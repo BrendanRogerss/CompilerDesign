@@ -1,0 +1,6 @@
+cd HelloWorld
+main
+	i:integer
+being
+	out << "Hello World!";
+end cd HelloWorld

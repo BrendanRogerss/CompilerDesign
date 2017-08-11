@@ -1,0 +1,23 @@
+cd Fibonacci
+
+constants	size is 3
+
+types
+	XX is x:integer end
+	YY is array[size] of XX
+arrays ZZ : YY
+
+func fib(i:integer) : integer
+begin
+	if (i == 1) return 1; end
+	if (i == 2) return 1; end
+
+	return (fib(i-1)+fib(i-2));
+end
+
+main
+	i:integer
+begin
+	in >> i;
+	out << fib(i);
+end cd Fibonacci
