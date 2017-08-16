@@ -14,7 +14,7 @@ begin
 	for(k<<0; k<i)
 		out << "Enter x"
 		in >> PP[k].x;
-		out << "Enter y"
+		out << "Enter y";
 		in >> PP[k].y;
 		k << k+1;
 	end

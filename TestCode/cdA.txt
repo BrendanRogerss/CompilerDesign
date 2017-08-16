@@ -1,0 +1,7 @@
+CD A
+
+main
+   i:integer
+begin
+   i << 123.abc;
+end CD A

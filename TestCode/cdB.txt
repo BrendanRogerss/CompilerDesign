@@ -1,0 +1,7 @@
+cd B
+
+main
+  i:integer
+begin
+  out << message;
+end cd B

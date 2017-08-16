@@ -1,0 +1,33 @@
+cd C
+constants size is 100
+types
+    X is x:integer end
+    vector is array[size] of X
+arrays V : vector
+
+func fill(vec : vector) void:
+    k:integer
+begin
+    for (k<<99; k>=0)
+        vec[99-k].x << k;
+        k << k+ 1;
+end
+
+func set(vec : vector, i:integer, value: X) : void
+    vec[i] << value.x;
+end
+
+func double(const i:integer) : integer
+    k:integer
+begin
+    k << i;
+    return k*2
+end
+
+main
+    i:integer
+begin
+    fill(V);
+    for(i<<0; k<100)
+        V[i].x << double(V[i].x)
+end cd C
