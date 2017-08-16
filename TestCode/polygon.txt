@@ -1,0 +1,42 @@
+cd polygon
+
+constants size is 20
+
+types
+	point is x:integer, y:integer end
+	polygon is array[size]of point
+
+arrays PP : polygon
+
+func getPoints(i:integer) : void
+	k:integer
+begin
+	for(k<<0; k<i)
+		out << "Enter x"
+		in >> PP[k].x;
+		out << "Enter y"
+		in >> PP[k].y;
+		k << k+1;
+	end
+return;
+end
+
+func calculateArea(i:integer) : integer
+	total:integer, k:integer
+begin
+	for(k<<0; k<(i-2))
+		total << total + ((PP[k].x+PP[k+1].x)*(PP[k].y+PP[k+1].y));
+	end
+
+	return total/2;
+end
+
+main
+   points:integer
+begin
+	out << "Enter number of points";
+	in >> points;
+	out << getPoints(points);
+
+end cd polygon
+	
