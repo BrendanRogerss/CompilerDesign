@@ -1,3 +1,5 @@
+/--a program with functions and parameter passing
+
 cd C
 constants size is 100
 types
@@ -5,6 +7,7 @@ types
     vector is array[size] of X
 arrays V : vector
 
+/-- fills integers into the array
 func fill(vec : vector) void:
     k:integer
 begin
@@ -13,10 +16,12 @@ begin
         k << k+ 1;
 end
 
+//sets a value into the array
 func set(vec : vector, i:integer, value: X) : void
     vec[i] << value.x;
 end
 
+//returns double of the input
 func double(const i:integer) : integer
     k:integer
 begin

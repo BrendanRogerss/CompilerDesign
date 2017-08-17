@@ -1,3 +1,5 @@
+/-- A very simple program
+
 cd HelloWorld
 main
 	i:integer

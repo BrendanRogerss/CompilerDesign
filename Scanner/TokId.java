@@ -28,9 +28,9 @@ public enum TokId {
 
     // then the operators and delimiters
     TLBRK, TRBRK, TLPAR, TRPAR, TSEMI, TCOMA, TCOLN, TDOTT, TASGN, TINPT,
-    //			  [      ]      (      )      ;      ,      :      .      <<     >>
+//	  [      ]      (      )      ;      ,      :      .      <<     >>
     TDEQL, TNEQL, TGRTR, TLEQL, TLESS, TGREQ, TADDT, TSUBT, TMULT, TDIVT, TPERC, TCART,
-//			  ==     !=     >      <=     <      >=     +      -      *      /      %      ^
+//	  ==     !=     >      <=     <      >=     +      -      *      /      %      ^
 
     // then the tokens which need tuple values
     TIDNT, TILIT, TFLIT, TSTRG, TUNDF    // TUNDF is only a pseudo-token-value

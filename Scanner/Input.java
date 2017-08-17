@@ -7,6 +7,8 @@ import java.util.Arrays;
 public class Input {
 
     private PushbackReader reader = null;
+    public int row = 0;
+    public int col = 0;
 
     public Input(String filename){
 
@@ -25,22 +27,30 @@ public class Input {
     }
 
     public String getWord() throws IOException {
-        String[] accept = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",
-        "1","2","3","4","5","6","7","8","9","0"};
         String output = "";
         String letter = get();
-        while (Arrays.asList(accept).contains(letter)){
+        while (Character.isAlphabetic(letter.charAt(0)) || Character.isDigit(letter.charAt(0))){
             output+=letter;
+            letter = get();
         }
         reader.unread(letter.charAt(0));
         return output.toLowerCase();
     }
-//    public String getLine() throws IOException {
-//        return reader.readLine().toLowerCase();
-//    }
+    public String getLine() throws IOException {
+        String line = "";
+        String letter = get();
+        while(!letter.equals("\n")){
+            line+=letter;
+        }
+        return line;
+    }
 
     public boolean eof() throws IOException {
         return reader.ready();
+    }
+
+    public void pushback(String s) throws IOException {
+        reader.unread(s.charAt(0));
     }
 
 }
