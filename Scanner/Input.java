@@ -16,14 +16,19 @@ public class Input {
             File file = new File(filename);
             reader = new PushbackReader(new FileReader(file));
 
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public String get() throws IOException {
-        return Character.toString((char) reader.read()).toLowerCase();
+        String input = Character.toString((char)reader.read());
+        if(input.equals("\n")){
+            row++;
+            col = 1;
+        }
+        col++;
+        return input;
     }
 
     public String getWord() throws IOException {
@@ -39,14 +44,15 @@ public class Input {
     public String getLine() throws IOException {
         String line = "";
         String letter = get();
-        while(!letter.equals("\n")){
+        while(!letter.equals("\n")&&!letter.equals("\r")){
             line+=letter;
+            letter=get();
         }
         return line;
     }
 
     public boolean eof() throws IOException {
-        return reader.ready();
+        return !reader.ready();
     }
 
     public void pushback(String s) throws IOException {

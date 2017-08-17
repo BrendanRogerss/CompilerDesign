@@ -1,8 +1,7 @@
-/-- A very simple program
-
+/-- a
 cd HelloWorld
 main
 	i:integer
-being
+begin
 	out << "Hello World!";
 end cd HelloWorld

@@ -31,7 +31,6 @@ public class Scanner {
     public String getToken() throws IOException {
         String buffer = "";
         String character;
-        //TODO: add break to every case
         while(true){
             character = r.get();
             switch(charType(character.charAt(0))){
@@ -61,6 +60,7 @@ public class Scanner {
                             return tokenizer.getToken(buffer);
                         }else if(character.equals("\n")){
                             //TODO: some error shit, idk.
+                            Assignment1.out.printError("Error on line: "+Integer.toString(r.row)+"Expected \",instead found end of line");
                         }else{
                             buffer+=character;
                         }
@@ -117,26 +117,23 @@ public class Scanner {
                     buffer=character+r.get()+r.get();
                     if(buffer.equals("/--")){ // comment found
                         buffer+=r.getLine();
-                        return tokenizer.getToken(buffer);
+                        //return tokenizer.getToken(buffer);
+                        break;
                     }else{ //not a comment
-                        r.pushback(buffer.substring(2,2));
-                        r.pushback(buffer.substring(1,1));
+                        //TODO: push back both at same time
+                        r.pushback(buffer.substring(2,3));
+                        r.pushback(buffer.substring(1,2));
                         return tokenizer.getToken("/");
                     }
 
                 case "%":return tokenizer.getToken(character);
                 case "^":return tokenizer.getToken(character);
+                case " ":break; //TODO: check if this is the correct way to handle whitespace and \n
+                case "\n":break;
+                case "\r":break;
+                case "\t":break;
                 default:return  tokenizer.getToken(character);
-
             }
-
-
         }
-
-
-
-
-
     }
-
 }

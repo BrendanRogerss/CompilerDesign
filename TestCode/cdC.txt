@@ -16,12 +16,12 @@ begin
         k << k+ 1;
 end
 
-//sets a value into the array
+/--sets a value into the array
 func set(vec : vector, i:integer, value: X) : void
     vec[i] << value.x;
 end
 
-//returns double of the input
+/--returns double of the input
 func double(const i:integer) : integer
     k:integer
 begin
