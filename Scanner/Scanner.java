@@ -17,6 +17,16 @@ public class Scanner {
         return r.eof();
     }
 
+    public boolean isUndefined(String s){
+        boolean undefined = true;
+        if(Character.isAlphabetic(s.charAt(0)) || Character.isDigit(s.charAt(0))){
+            undefined = false;
+        }
+
+
+        return undefined;
+    }
+
     public String charType(char input){
         String output = Character.toString(input);
         if(Character.isAlphabetic(input)){
@@ -129,7 +139,8 @@ public class Scanner {
                 case "\n":break;
                 case "\r":break;
                 case "\t":break;
-                default:return  tokenizer.getToken(character);
+                default: //undefined character
+                    return  tokenizer.getToken(character);
             }
         }
     }
