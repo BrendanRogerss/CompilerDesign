@@ -10,7 +10,7 @@ public class OutputController {
             row++;
         }else{
             if(col%6!=0){
-                for (int i = 0; i < 5-col%6; i++) {
+                for (int i = 0; i < 6-col%6; i++) {
                     buffer+=" ";
                 }
             }

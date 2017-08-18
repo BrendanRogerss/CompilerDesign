@@ -23,7 +23,7 @@ begin
 	return zz[2]; 
 end
 
-main
+Main
 	i:integer
 begin
 	in >> i;

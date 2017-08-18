@@ -1,4 +1,3 @@
-import java.io.CharArrayReader;
 import java.io.IOException;
 
 /**
@@ -60,7 +59,7 @@ public class Scanner {
                             return tokenizer.getToken(buffer);
                         }else if(character.equals("\n")){
                             //TODO: some error shit, idk.
-                            Assignment1.out.printError("Error on line: "+Integer.toString(r.row)+"Expected \",instead found end of line");
+                            A1.out.printError("Error on line: "+Integer.toString(r.row)+"Expected \",instead found end of line");
                         }else{
                             buffer+=character;
                         }
@@ -109,7 +108,6 @@ public class Scanner {
                             r.pushback(character);
                             return tokenizer.getToken("<");
                     }
-
                 case "+":return tokenizer.getToken(character);
                 case "-":return tokenizer.getToken(character);
                 case "*":return tokenizer.getToken(character);
@@ -125,7 +123,6 @@ public class Scanner {
                         r.pushback(buffer.substring(1,2));
                         return tokenizer.getToken("/");
                     }
-
                 case "%":return tokenizer.getToken(character);
                 case "^":return tokenizer.getToken(character);
                 case " ":break; //TODO: check if this is the correct way to handle whitespace and \n

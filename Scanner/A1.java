@@ -3,15 +3,17 @@ import java.io.IOException;
 /**
  * Created by Brendan on 15/8/17.
  */
-public class Assignment1 {
+public class A1 {
 
     private Scanner scanner;
     private Input input;
     static OutputController out = new OutputController();
 
     public static void main(String[] args) throws IOException {
-        Assignment1 run = new Assignment1();
-        run.run(args[0]);
+        A1 run = new A1();
+        //run.run(args[0]);
+        run.run("TestCode/cdC.txt");
+
     }
 
     public void run(String filename) throws IOException {
