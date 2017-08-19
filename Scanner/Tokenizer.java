@@ -29,7 +29,6 @@ public class Tokenizer {
     }
 
     public String getToken(String token){
-        //TODO: floats
         String output = "";
         String keyword = literals.get(token.toUpperCase());
         if(keyword != null){
@@ -46,11 +45,15 @@ public class Tokenizer {
         }else if(Character.isDigit(token.charAt(0))){
             //int
             output = "TILIT " + token;
-            if(couldBeFloat == 0){
-                couldBeFloat = 1;
-            }else if(couldBeFloat == 2){
+            if(couldBeFloat == 2){
                 output = "TFLIT "+token; //found a float
                 couldBeFloat = 0;
+            }else{
+                couldBeFloat = 1;
+                if(token.substring(0,1).equals("0") && token.length() > 1){
+                    output = "TUNDF "+token;
+                    couldBeFloat = 0;
+                }
             }
         }else if(Character.isAlphabetic(token.charAt(0))) {
             //variable

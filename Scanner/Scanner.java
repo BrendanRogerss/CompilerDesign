@@ -23,9 +23,10 @@ public class Scanner {
             undefined = false;
         }
         //TODO: does = belong here?
-        String[] delimiters = {"\"","[","]","(",")",";",",",":",".","=","!",">","<","+","-","*","/","%","^"," ","\n","\r","\t"};
-
-
+        String delimiters = "\"[]();,:.=!><+-*/%^ \n\r\t";
+        if(delimiters.contains(s)){
+            undefined = false;
+        }
         return undefined;
     }
 
@@ -57,9 +58,6 @@ public class Scanner {
                     }
                     r.pushback(character); //pushback whatever character we grabbed that wasn't a number
                     return tokenizer.getToken(buffer);
-                case "0":
-                    //TODO: deal with leading 0s
-
                 case "\"": //opened up a string
                     //consume until another "
                     buffer+=character;
@@ -71,19 +69,12 @@ public class Scanner {
                             return tokenizer.getToken(buffer);
                         }else if(character.equals("\n")){
                             //TODO: some error shit, idk.
-                            A1.out.printError("Error on line: "+Integer.toString(r.row)+"Expected \",instead found end of line");
+                            A1.out.printError("\nError on line: "+Integer.toString(r.row)+"Expected \",instead found end of line");
+                            return getToken();
                         }else{
                             buffer+=character;
                         }
                     }
-                case "[":return tokenizer.getToken(character);
-                case "]":return tokenizer.getToken(character);
-                case "(":return tokenizer.getToken(character);
-                case ")":return tokenizer.getToken(character);
-                case ";":return tokenizer.getToken(character);
-                case ",":return tokenizer.getToken(character);
-                case ":":return tokenizer.getToken(character);
-                case ".":return tokenizer.getToken(character);
                 case "=":
                     character = r.get();
                     switch(character){
@@ -91,7 +82,7 @@ public class Scanner {
                             return tokenizer.getToken("==");
                         default:
                             r.pushback(character);
-                            //TODO: whatever happens here
+                            return tokenizer.getToken("=");
                     }
                 case "!":
                     character = r.get();
@@ -100,7 +91,7 @@ public class Scanner {
                             return tokenizer.getToken("!=");
                         default:
                             r.pushback(character);
-                            //TODO: whatever happens here
+                            return tokenizer.getToken("!");
                     }
                 case ">":
                     character = r.get();
@@ -120,9 +111,7 @@ public class Scanner {
                             r.pushback(character);
                             return tokenizer.getToken("<");
                     }
-                case "+":return tokenizer.getToken(character);
-                case "-":return tokenizer.getToken(character);
-                case "*":return tokenizer.getToken(character);
+
                 case "/":
                     buffer=character+r.get()+r.get();
                     if(buffer.equals("/--")){ // comment found
@@ -135,14 +124,30 @@ public class Scanner {
                         r.pushback(buffer.substring(1,2));
                         return tokenizer.getToken("/");
                     }
+                case "[":return tokenizer.getToken(character);
+                case "]":return tokenizer.getToken(character);
+                case "(":return tokenizer.getToken(character);
+                case ")":return tokenizer.getToken(character);
+                case ";":return tokenizer.getToken(character);
+                case ",":return tokenizer.getToken(character);
+                case ":":return tokenizer.getToken(character);
+                case ".":return tokenizer.getToken(character);
+                case "+":return tokenizer.getToken(character);
+                case "-":return tokenizer.getToken(character);
+                case "*":return tokenizer.getToken(character);
                 case "%":return tokenizer.getToken(character);
                 case "^":return tokenizer.getToken(character);
-                case " ":break; //TODO: check if this is the correct way to handle whitespace and \n
-                case "\n":break;
-                case "\r":break;
-                case "\t":break;
+                case " ":continue;
+                case "\n":continue;
+                case "\r":continue;
+                case "\t":continue;
                 default: //undefined character
-                    return  tokenizer.getToken(character);
+                    while(isUndefined(character) && !r.eof()){
+                        buffer+=character;
+                        character=r.get();
+                    }
+                    r.pushback(character);
+                    return  tokenizer.getToken(buffer);
             }
         }
     }

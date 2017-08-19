@@ -26,7 +26,9 @@ public class OutputController {
     }
 
     public void printError(String s){
-
+        System.out.println(s);
+        row++;
+        col = 0;
     }
 
 }

@@ -12,7 +12,7 @@ public class A1 {
     public static void main(String[] args) throws IOException {
         A1 run = new A1();
         //run.run(args[0]);
-        run.run("TestCode/cdC.txt");
+        run.run("TestCode/cdHelloWorld.txt");
 
     }
 
@@ -24,5 +24,7 @@ public class A1 {
         while(!scanner.eof()){
             out.print(scanner.getToken());
         }
+        out.print("EOF");
+
     }
 }

@@ -14,7 +14,7 @@ public class Input {
 
         try {
             File file = new File(filename);
-            reader = new PushbackReader(new FileReader(file));
+            reader = new PushbackReader(new FileReader(file), 100);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,7 +52,9 @@ public class Input {
     }
 
     public boolean eof() throws IOException {
-        return !reader.ready();
+        int eof = reader.read();
+        reader.unread(eof);
+        return eof==65535;
     }
 
     public void pushback(String s) throws IOException {
