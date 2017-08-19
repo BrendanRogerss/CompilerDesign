@@ -22,6 +22,8 @@ public class Scanner {
         if(Character.isAlphabetic(s.charAt(0)) || Character.isDigit(s.charAt(0))){
             undefined = false;
         }
+        //TODO: does = belong here?
+        String[] delimiters = {"\"","[","]","(",")",";",",",":",".","=","!",">","<","+","-","*","/","%","^"," ","\n","\r","\t"};
 
 
         return undefined;
