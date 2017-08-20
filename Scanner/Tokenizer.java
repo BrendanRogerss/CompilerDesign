@@ -7,7 +7,6 @@ import java.util.HashMap;
 public class Tokenizer {
 
     private HashMap<String, String> literals = new HashMap<>(100);
-    private int couldBeFloat = 0;
 
     public Tokenizer(){
         //operators and delimiters
@@ -33,36 +32,32 @@ public class Tokenizer {
         String keyword = literals.get(token.toUpperCase()); //check if the token was a keyword or delimiter
         if(keyword != null){
             output = keyword;
-            if(output.equals("TDOTT") && couldBeFloat == 1){ //check if the dot could lead into a float
-                couldBeFloat = 2;
-            }else{
-                couldBeFloat = 0;
-            }
+
         }else if(token.substring(0,1).equals("\"")){ //check if string
             //string
             output = "TSTRG "+token;
-            couldBeFloat = 0;
         }else if(Character.isDigit(token.charAt(0))){
-            //token is an int
-            output = "TILIT " + token;
-            if(couldBeFloat == 2){ //check if the token is a float
-                output = "TFLIT "+token; //found a float
-                couldBeFloat = 0;
-            }else{
-                couldBeFloat = 1;
-                if(token.substring(0,1).equals("0") && token.length() > 1){ //check if the int has a leading 0
-                    output = "TUNDF "+token;
-                    couldBeFloat = 0;
+            //token is an int or float
+            if(token.contains(".")){ //float
+                if(token.substring(0,2).equals("00")){//needs 2 leading 0s to be undefined
+                    output = "TUNDF " + token;
+                }else {
+                    output = "TFLIT " + token;
+                }
+            }else{ //int
+                if(token.substring(0,1).equals("0")){ //check leading 0
+                    output = "TUNDF " + token;
+                }else {
+                    output = "TILIT " + token;
                 }
             }
+
         }else if(Character.isAlphabetic(token.charAt(0))) {
             //variable
             output = "TIDNT " + token;
-            couldBeFloat = 0;
 
         }else{
             output = "TUNDF " + token; //undefined token
-            couldBeFloat = 0;
         }
         return output;
     }

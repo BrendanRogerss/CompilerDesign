@@ -64,7 +64,22 @@ public class Scanner {
                         buffer+=character;
                         character = r.get();
                     }
-                    r.pushback(character); //pushback whatever character we grabbed that wasn't a number
+                    if(character.equals(".")){
+                        String floatBuffer = ".";
+                        character = r.get();
+                        while(charType(character.charAt(0)).equals("1")){ //check for the rest of the float
+                            floatBuffer+=character;
+                            character = r.get();
+                        }
+                        r.pushback(character);
+                        if(floatBuffer.length()>1){ //check if we got more numbers
+                            buffer+=floatBuffer;
+                        }else{
+                            r.pushback(".");
+                        }
+                    }else{
+                        r.pushback(character); //pushback whatever character we grabbed that wasn't a number
+                    }
                     return tokenizer.getToken(buffer);
                 case "\"": //opened up a string
                     //consume until another "
