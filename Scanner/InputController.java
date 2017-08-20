@@ -3,14 +3,19 @@ import java.util.Arrays;
 
 /**
  * Created by Brendan on 15/8/17.
+ * Student Number"3208972
+ *
+ * Class that controls the input from the file
+ * maintains information of where in the file it is
+ * is able to get a single character, word or line
+ * can check if it is the end of file
  */
-public class Input {
+public class InputController {
 
     private PushbackReader reader = null;
     public int row = 0;
-    public int col = 0;
 
-    public Input(String filename){
+    public InputController(String filename){
 
         try {
             File file = new File(filename);
@@ -21,16 +26,15 @@ public class Input {
         }
     }
 
+    //returns the next character
     public String get() throws IOException {
         String input = Character.toString((char)reader.read());
         if(input.equals("\n")){
             row++;
-            col = 1;
         }
-        col++;
         return input;
     }
-
+    //returns the next 'word', that being a series of alphanumeric characters
     public String getWord() throws IOException {
         String output = "";
         String letter = get();
@@ -41,6 +45,7 @@ public class Input {
         reader.unread(letter.charAt(0));
         return output.toLowerCase();
     }
+    //gets the rest of the line
     public String getLine() throws IOException {
         String line = "";
         String letter = get();
@@ -51,12 +56,14 @@ public class Input {
         return line;
     }
 
+    //checks if the file has ended
     public boolean eof() throws IOException {
         int eof = reader.read();
         reader.unread(eof);
-        return eof==65535;
+        return (eof==65535 || !reader.ready() || eof==-1);
     }
 
+    //returns a character back into the input stream
     public void pushback(String s) throws IOException {
         reader.unread(s.charAt(0));
     }

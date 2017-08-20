@@ -21,7 +21,7 @@ func set(vec : vector, i:integer, value: X) : void
     vec[i] << value.x;
 end
 
-/--returns double of the input
+/--returns double of the inputController
 func double(const i:integer) : integer
     k:integer
 begin

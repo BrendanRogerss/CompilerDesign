@@ -22,7 +22,7 @@ public class Tokenizer {
                 ")",";",",",":",".","<<",">>","==", "!=",">","<=",
                 "<",">=","+","-","*","/","%","^"};
 
-        //EOF, TILIT, TFLIT, TSTRG, TUNDF
+        //Creates a hashmap of all the keyword and delimiter tokens
         for (int i = 0; i < inputs.length; i++) {
             literals.put(inputs[i],tokens[i]);
         }
@@ -30,10 +30,10 @@ public class Tokenizer {
 
     public String getToken(String token){
         String output = "";
-        String keyword = literals.get(token.toUpperCase());
+        String keyword = literals.get(token.toUpperCase()); //check if the token was a keyword or delimiter
         if(keyword != null){
             output = keyword;
-            if(output.equals("TDOTT") && couldBeFloat == 1){
+            if(output.equals("TDOTT") && couldBeFloat == 1){ //check if the dot could lead into a float
                 couldBeFloat = 2;
             }else{
                 couldBeFloat = 0;
@@ -43,14 +43,14 @@ public class Tokenizer {
             output = "TSTRG "+token;
             couldBeFloat = 0;
         }else if(Character.isDigit(token.charAt(0))){
-            //int
+            //token is an int
             output = "TILIT " + token;
-            if(couldBeFloat == 2){
+            if(couldBeFloat == 2){ //check if the token is a float
                 output = "TFLIT "+token; //found a float
                 couldBeFloat = 0;
             }else{
                 couldBeFloat = 1;
-                if(token.substring(0,1).equals("0") && token.length() > 1){
+                if(token.substring(0,1).equals("0") && token.length() > 1){ //check if the int has a leading 0
                     output = "TUNDF "+token;
                     couldBeFloat = 0;
                 }
@@ -61,7 +61,7 @@ public class Tokenizer {
             couldBeFloat = 0;
 
         }else{
-            output = "TUNDF " + token;
+            output = "TUNDF " + token; //undefined token
             couldBeFloat = 0;
         }
         return output;

@@ -1,33 +1,27 @@
 public class OutputController {
 
     private int col = 0;
-    private int row = 0;
-    public void print(String s){
-        String buffer = " ";
-        if(col > 60){
-            col=s.length()+1;
-            System.out.print("\n"+s);
-            row++;
-        }else{
-            if(col%6!=0){
-                for (int i = 0; i < 6-col%6; i++) {
-                    buffer+=" ";
-                }
-            }
-            if(row == 0 && col == 0){
-                col+=s.length()+buffer.length();
-                System.out.print(s);
-            }else {
-                col += s.length() + buffer.length();
-                System.out.print(buffer + s);
 
-            }
+    //prints each token according to the specification
+    public void print(String s){
+        if(s==null){
+            return;
         }
+        s+=" ";
+        while(s.length()%6!=0){ //format so each token lines up
+            s+=" ";
+        }
+        if(col>=60){ //move to the next column
+            s = "\n"+s;
+            col=0;
+        }
+        col+=s.length();
+        System.out.print(s);
     }
 
+    //prints errors
     public void printError(String s){
         System.out.println(s);
-        row++;
         col = 0;
     }
 
