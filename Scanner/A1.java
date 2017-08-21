@@ -3,7 +3,6 @@ import java.io.IOException;
 /**
  * Created by Brendan on 15/8/17.
  * Student Number: 3208972
- * main class to run the program
  */
 public class A1 {
 
@@ -14,6 +13,7 @@ public class A1 {
     public static void main(String[] args) throws IOException {
         A1 run = new A1();
         //run.run(args[0]);
+        run.run("TestCode/cdsrc1.txt");
 
     }
 

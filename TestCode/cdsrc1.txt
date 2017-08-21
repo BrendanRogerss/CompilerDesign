@@ -31,7 +31,7 @@ x  y  z  abc  defgh  beginn 123   456   7  8  9  10   321.44  543.00  0.01  6.00
 
 /--	Part 5 - String Literals
 
-"this is a string"   "this is not a string --- not"
+"this is a string"   "this is not a string --- not
 
 /--	Part 6 - Some example CD code
 

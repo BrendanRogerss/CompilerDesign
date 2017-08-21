@@ -84,7 +84,7 @@ public class Scanner {
                 case "\"": //opened up a string
                     //consume until another "
                     buffer+=character;
-                    while(true){
+                    while(!r.eof()){
                         character = r.get();
                         switch (character) {
                             case "\"": //found the end of the string
@@ -99,6 +99,7 @@ public class Scanner {
                                 break;
                         }
                     }
+                    return null;
                 case "=": //could be ==
                     character = r.get(); //get next character
                     switch(character){

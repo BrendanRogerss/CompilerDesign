@@ -6,7 +6,7 @@ call with loop exit when if then else elsif input
 
 print printline not and or xor div length
 
-  =  +=  -=  *=  /=  <= >= == !=  <  >  123.456  0 
+  =  +=  -=  *=  /=  <= >= == !=  <  >  123.456  0
 
 , ;  [  ]  (  )  .   +  -  *  /
 
@@ -16,4 +16,3 @@ short  ex3   verylongidentifier
 
 "fairly long string"  "string"
 
-@!@!
