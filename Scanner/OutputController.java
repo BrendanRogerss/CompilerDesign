@@ -11,8 +11,8 @@ public class OutputController {
         while(s.length()%6!=0){ //format so each token lines up
             s+=" ";
         }
-        if(col>=60){ //move to the next column
-            s = "\n"+s;
+        if(col>60){ //move to the next column
+            System.out.println();
             col=0;
         }
         col+=s.length();

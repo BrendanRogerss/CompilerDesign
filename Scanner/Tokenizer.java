@@ -10,7 +10,7 @@ public class Tokenizer {
 
     public Tokenizer(){
         //operators and delimiters
-        String[] tokens = {"TCD  ","TCONS","TTYPS","TISKW","TMAIN","TBEGN","TENDK","TARRY","TOFKW", "TFUNC", "TVOID",
+        String[] tokens = {"TCD","TCONS","TTYPS","TISKW","TMAIN","TBEGN","TENDK","TARRY","TOFKW", "TFUNC", "TVOID",
                 "TCNST", "TINTG", "TREAL", "TBOOL", "TFORK", "TREPT", "TUNTL", "TIFKW", "TELSE", "TINKW", "TOUTP",
                 "TOUTL", "TRETN", "TNOTK", "TANDK", "TORKW", "TXORK", "TTRUE", "TFALS","TLBRK", "TRBRK", "TLPAR",
                 "TRPAR", "TSEMI", "TCOMA", "TCOLN", "TDOTT", "TASGN", "TINPT","TDEQL", "TNEQL", "TGRTR", "TLEQL",
@@ -45,7 +45,7 @@ public class Tokenizer {
                     output = "TFLIT " + token;
                 }
             }else{ //int
-                if(token.substring(0,1).equals("0")){ //check leading 0
+                if(token.substring(0,1).equals("0") && token.length()>1){ //check leading 0
                     output = "TUNDF " + token;
                 }else {
                     output = "TILIT " + token;
