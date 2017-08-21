@@ -14,12 +14,12 @@ public class Tokenizer {
                 "TCNST", "TINTG", "TREAL", "TBOOL", "TFORK", "TREPT", "TUNTL", "TIFKW", "TELSE", "TINKW", "TOUTP",
                 "TOUTL", "TRETN", "TNOTK", "TANDK", "TORKW", "TXORK", "TTRUE", "TFALS","TLBRK", "TRBRK", "TLPAR",
                 "TRPAR", "TSEMI", "TCOMA", "TCOLN", "TDOTT", "TASGN", "TINPT","TDEQL", "TNEQL", "TGRTR", "TLEQL",
-                "TLESS", "TGREQ", "TADDT", "TSUBT", "TMULT", "TDIVT", "TPERC", "TCART"};
-        String[] inputs = {"CD","CONSTANTS","TYPES","IS","MAIN","BEGIN","END","ARRAYS","OF","FUNC","VOID",
+                "TLESS", "TGREQ", "TADDT", "TSUBT", "TMULT", "TDIVT", "TPERC", "TCART","TARRS"};
+        String[] inputs = {"CD","CONSTANTS","TYPES","IS","MAIN","BEGIN","END","ARRAY","OF","FUNC","VOID",
                 "CONST","INTEGER","REAL","BOOLEAN","FOR","REPEAT","UNTIL","IF","ELSE","IN","OUT",
                 "LINE","RETURN","NOT","AND","OR","XOR","TRUE","FALSE","[","]", "(",
                 ")",";",",",":",".","<<",">>","==", "!=",">","<=",
-                "<",">=","+","-","*","/","%","^"};
+                "<",">=","+","-","*","/","%","^","ARRAYS"};
 
         //Creates a hashmap of all the keyword and delimiter tokens
         for (int i = 0; i < inputs.length; i++) {
@@ -39,7 +39,7 @@ public class Tokenizer {
         }else if(Character.isDigit(token.charAt(0))){
             //token is an int or float
             if(token.contains(".")){ //float
-                if(token.substring(0,2).equals("00")){//needs 2 leading 0s to be undefined
+                if(token.substring(0,1).equals("0")&&!token.substring(1,2).equals(".")){//needs 2 leading 0s to be undefined
                     output = "TUNDF " + token;
                 }else {
                     output = "TFLIT " + token;

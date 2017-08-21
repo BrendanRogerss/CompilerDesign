@@ -138,10 +138,23 @@ public class Scanner {
 
                 case "/": //could be the opening of a comment
                     buffer=character+r.get()+r.get(); //get the next 2 characters
-                    if(buffer.equals("/--")){ // comment found
+                    if(buffer.equals("/--")) { // comment found
                         r.getLine(); //consume the rest of the line
                         buffer = "";
                         continue;
+                    }else if(buffer.equals("/-*")){ //multi line comment
+                        int start = r.row;
+                        buffer = "";
+                        while(!buffer.contains("*-/")){
+                            if(r.eof()){ //hit the end of file, ERROR!!1!!!1one
+                                A1.out.print("Reached end of line while parsing multi line comment. Comment starts on line: "+start);
+                                return null;
+                            }
+                            buffer = r.getLine();
+                        }
+                        buffer="";
+                        continue;
+
                     }else{ //not a comment
                         //push back the 2 characters gotten
                         r.pushback(buffer.substring(2,3));

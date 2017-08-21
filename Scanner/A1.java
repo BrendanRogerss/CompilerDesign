@@ -3,6 +3,7 @@ import java.io.IOException;
 /**
  * Created by Brendan on 15/8/17.
  * Student Number: 3208972
+ * main class to run the program
  */
 public class A1 {
 
@@ -13,7 +14,6 @@ public class A1 {
     public static void main(String[] args) throws IOException {
         A1 run = new A1();
         //run.run(args[0]);
-        run.run("TestCode/cdsrc98.txt");
 
     }
 
@@ -25,7 +25,7 @@ public class A1 {
         while(!scanner.eof()){ //loop until the file ends
             out.print(scanner.getToken()); //get token and send it to the output controller
         }
-        out.print("EOF"); //send out the EOD token
+        out.print("TEOF"); //send out the EOD token
 
     }
 }

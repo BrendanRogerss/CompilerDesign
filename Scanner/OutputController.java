@@ -6,6 +6,10 @@ public class OutputController {
     public void print(String s){
         if(s==null){
             return;
+        }else if(s.contains("TUNDF")){//output an undefined token
+            System.out.println("\n"+s);
+            col=0;
+            return;
         }
         s+=" ";
         while(s.length()%6!=0){ //format so each token lines up
