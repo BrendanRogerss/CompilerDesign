@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by Brendan on 15/8/17.
@@ -9,23 +10,30 @@ public class A1 {
     private Scanner scanner;
     private InputController inputController;
     static OutputController out = new OutputController();
+    static ArrayList<String> tokens = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
         A1 run = new A1();
         //run.run(args[0]);
-        run.run("TestCode/cdsrc1.txt");
+        run.run("TestCode/cdsrc4.txt");
 
     }
 
-    public void run(String filename) throws IOException {
-        inputController = new InputController(filename); //instantiate some objects
-        scanner = new Scanner(inputController);
+    public ArrayList<String> run(String filename) {
+
+        try{
+            inputController = new InputController(filename); //instantiate some objects
+            scanner = new Scanner(inputController);
 
 
-        while(!scanner.eof()){ //loop until the file ends
-            out.print(scanner.getToken()); //get token and send it to the output controller
+            while (!scanner.eof()) { //loop until the file ends
+                out.print(scanner.getToken()); //get token and send it to the output controller
+            }
+            out.print("TEOF"); //send out the EOD token
+        }catch (Exception e){
+
         }
-        out.print("TEOF"); //send out the EOD token
+        return tokens;
 
     }
 }

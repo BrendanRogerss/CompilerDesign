@@ -3,10 +3,5 @@ cd HelloWorld
 Main
 	i:integer
 begin
-    123.abc
-    0123.123
-    @##
-    ##!#@
-    /-!
 	out << "Hello World!;
 end cd HelloWorld

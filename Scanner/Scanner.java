@@ -93,7 +93,7 @@ public class Scanner {
                             case "\n":
                             case "\r": //end of line while parsing string
                                 A1.out.printError("\nError on line: " + Integer.toString(r.row) + " Expected \" instead found end of line");
-                                return getToken();
+                                return null;
                             default:
                                 buffer += character;
                                 break;
@@ -142,7 +142,7 @@ public class Scanner {
                     if(buffer.equals("/--")) { // comment found
                         r.getLine(); //consume the rest of the line
                         buffer = "";
-                        continue;
+                        return null;
                     }else if(buffer.equals("/-*")){ //multi line comment
                         int start = r.row;
                         buffer = "";
@@ -151,10 +151,9 @@ public class Scanner {
                                 A1.out.print("Reached end of line while parsing multi line comment. Comment starts on line: "+start);
                                 return null;
                             }
-                            buffer = r.getLine();
+                            buffer += r.get();
                         }
-                        buffer="";
-                        continue;
+                        return null;
 
                     }else{ //not a comment
                         //push back the 2 characters gotten

@@ -38,7 +38,7 @@ public class Tokenizer {
             output = "TSTRG "+token;
         }else if(Character.isDigit(token.charAt(0))){
             //token is an int or float
-            if(token.contains(".")){ //float
+            if(token.contains("22")){ //float
                 if(token.substring(0,1).equals("0")&&!token.substring(1,2).equals(".")){//needs 2 leading 0s to be undefined
                     output = "TUNDF " + token;
                 }else {

@@ -6,7 +6,9 @@ public class OutputController {
     public void print(String s){
         if(s==null){
             return;
-        }else if(s.contains("TUNDF")){//output an undefined token
+        }
+        A1.tokens.add(s);
+        /*else if(s.contains("TUNDF")){//output an undefined token
             System.out.println("\n"+s);
             col=0;
             return;
@@ -21,6 +23,7 @@ public class OutputController {
         }
         col+=s.length();
         System.out.print(s);
+        */
     }
 
     //prints errors
