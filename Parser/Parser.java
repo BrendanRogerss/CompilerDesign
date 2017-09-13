@@ -103,7 +103,7 @@ public class Parser {
         return node;
     }
     private TreeNode slisttrail(){
-        if(check("TCOMA"){
+        if(check("TCOMA")){
             return slist();
         }
         return null;
@@ -112,18 +112,56 @@ public class Parser {
         TreeNode node = new TreeNode(Node.NTYPEL);
         node.setLeft(type());
         node.setRight(typelisttail());
+        return node;
     }
     private TreeNode typelisttail(){
-        //typelist || null
+        if(check("TIDNT")){
+            return typelist();
+        }
+        return null;
     }
     private TreeNode type(){
+        //TODO: id stuff
+        check("TISKW");
+        return typetail();
+    }
+    private TreeNode typetail(){
+        TreeNode node = new TreeNode(Node.NATYPE);
+        if(check("TARRY")){
+            check("TLBRK");
+            node.setLeft(expr());
+            check("TRBRK");
+            check("TOFKW");
+            //node.setRight(); TODO struct id
+        }else{
+            node = new TreeNode(Node.NRTYPE);
+            node.setLeft(fields());
+            check("TENDK");
+        }
+        return node;
+    }
+    private TreeNode fields(){
+        TreeNode node = new TreeNode(Node.NFLIST);
+        node.setLeft(sdecl());
+        node.setRight(fieldsTail());
+        return node;
+    }
+    private TreeNode fieldsTail(){
+        if(check("TCOMA")){
+            return fields();
+        }
+        return null;
+    }
+    private TreeNode sdecl(){
+        TreeNode node = new TreeNode(Node.NSDECL);
+        //node.setLeft(); todo: id
+        check("TCOLN");
+        node.setRight(stype());
+        return node;
+    }
+    private TreeNode arrdecls(){
 
     }
-    private TreeNode typetail(){}
-    private TreeNode fields(){}
-    private TreeNode fieldsTail(){}
-    private TreeNode sdecl(){}
-    private TreeNode arrdecls(){}
     private TreeNode arrdeclstail(){}
     private TreeNode arrdecl(){}
     private TreeNode udecl(){}
