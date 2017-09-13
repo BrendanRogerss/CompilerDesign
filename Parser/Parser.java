@@ -1,3 +1,5 @@
+import sun.reflect.generics.tree.Tree;
+
 import java.util.ArrayList;
 
 /**
@@ -160,61 +162,342 @@ public class Parser {
         return node;
     }
     private TreeNode arrdecls(){
+        TreeNode node = new TreeNode(Node.NALIST);
+        node.setLeft(arrdecl());
+        node.setRight(arrdeclstail());
+        return node;
+    }
+    private TreeNode arrdeclstail(){
+        if(check("TCOMA")){
+            return arrdecls();
+        }
+        return null;
+    }
+    private TreeNode arrdecl(){
+        TreeNode node = new TreeNode(Node.NARRD);
+        check("TIDNT"); //TODO: id stuff
+        check("TCOLN");
+        check("TIDNT"); //TODO:type id
+        return node;
+    }
+    private TreeNode udecl(){
+        check("TIDNT");
+        check("TCOMA");
+        return udecltail();
+    }
+    private TreeNode udecltail(){
+        //todo: this nonsense
+        //NSDECL	<udecltail>	::=	<stype>
+        //NARRD	    <udecltail>	::=	<typeid>
+        return null;
+    }
+    private TreeNode func(){
+        //NFUND	<func>	::=	func  <id> ( <plist> ) : <rtype> <funcbody>
+        return null;
+    }
+    private TreeNode rtype(){
+        //Special <rtype>	::=	<stype>
+        //Special <rtype>	::=	void
+        return null;
+    }
+    private TreeNode plist(){
+        //Special <plist>	::=	<params>
+        //Special <plist>	::=	epsilon
+        return null;
+    }
+    private TreeNode params(){
+        TreeNode node = new TreeNode(Node.NPLIST);
+        node.setLeft(param());
+        node.setRight(paramstail());
+        return node;
+    }
+    private TreeNode paramstail(){
+        if(check("TCOMA")){
+            return params();
+        }
+        return null;
+    }
+    private TreeNode param(){
+        //TODO
+        //NSIMP	<param>	::=	<udecl>
+        //NARRP	<param>	::=	<udecl>
+        //NARRC	<param>	::=	const <arrdecl>
+        return null;
+    }
+    private TreeNode funcbody(){
+        //Special	<funcbody>	::=	<locals> begin <stats> end
+        return null;
+    }
+    private TreeNode locals(){
+        //Special	<locals>	::=	<dlist>
+        //Special	<locals>	::=	epsilon
+        return null;
+    }
+    private TreeNode dlist(){
+        TreeNode node = new TreeNode(Node.NDLIST);
+        node.setLeft(decl());
+        node.setRight(dlisttail());
+        return node;
+    }
+    private TreeNode dlisttail(){
+        if(check("TCOMA")){
+            return dlist();
+        }
+        return null;
 
     }
-    private TreeNode arrdeclstail(){}
-    private TreeNode arrdecl(){}
-    private TreeNode udecl(){}
-    private TreeNode udecltail(){}
-    private TreeNode func(){}
-    private TreeNode rtype(){}
-    private TreeNode plist(){}
-    private TreeNode params(){}
-    private TreeNode paramstail(){}
-    private TreeNode param(){}
-    private TreeNode paramtail(){}
-    private TreeNode param(){}
-    private TreeNode funcbody(){}
-    private TreeNode locals(){}
-    private TreeNode dlist(){}
-    private TreeNode dlisttail(){}
-    private TreeNode decl(){}
-    private TreeNode stype(){}
-    private TreeNode stats(){}
-    private TreeNode statstail(){}
-    private TreeNode strstat(){}
-    private TreeNode stat(){}
-    private TreeNode idstat(){}
-    private TreeNode idtail(){}
-    private TreeNode forstat(){}
-    private TreeNode repstat(){}
-    private TreeNode asgnlist(){}
-    private TreeNode alist(){}
-    private TreeNode alisttail(){}
-    private TreeNode ifstat(){}
-    private TreeNode elsestat(){}
-    private TreeNode assgnstat(){}
-    private TreeNode idasgnstat(){}
-    private TreeNode iostat(){}
-    private TreeNode iostatmid(){}
-    private TreeNode iostatpr(){}
-    private TreeNode callstat(){}
-    private TreeNode callstatelist(){}
-    private TreeNode returnstat(){}
-    private TreeNode returnstattail(){}
-    private TreeNode vlist(){}
-    private TreeNode vlisttail(){}
-    private TreeNode var(){}
-    private TreeNode vararr(){}
-    private TreeNode vararrvar(){}
-    private TreeNode elist(){}
-    private TreeNode elisttail(){}
-    private TreeNode bool(){}
+    private TreeNode decl(){
+        return udecl();
+    }
+    private TreeNode stype(){
+        //TODO
+        //Special	<stype>	::=	integer
+        //Special	<stype>	::=	real
+        //Special	<stype>	::=	boolean
+        return null;
+    }
+    private TreeNode stats(){
+        TreeNode node = new TreeNode(Node.NSTATS);
+        if(check("whateverthefuckgoeshere")){//TODO
+            node.setLeft(stat());
+            check("TSEMI");
+            node.setRight(statstail());
+        }else{
+            node.setLeft(strstat());
+            node.setRight(statstail());
+        }
+        return node;
+    }
+    private TreeNode statstail(){
+        if(check("TIDNT")){
+            return stats();
+        }
+        return null;
+    }
+    private TreeNode strstat(){
+        //Special	<strstat>	::=	<forstat>
+        //Special	<strstat>	::=	<ifstat>
+        return null;
+    }
+    private TreeNode stat(){
+        //Special	<stat>	::=	<reptstat>
+        //Special	<stat>	::=	<idstat>
+        //Special	<stat>	::=	<iostat>
+        //Special	<stat>	::=	<returnstat>
+        return null;
+    }
+    private TreeNode idstat(){
+        //Special	<idstat>	::=	<id> <idtail>
+        return null;
+    }
+    private TreeNode idtail(){
+        //Special	<idtail>	::=	<varrarr> <idasgnstat>
+        //Special	<idtail>	::=	<callstat>
+        return null;
+    }
+    private TreeNode forstat(){
+        TreeNode node = new TreeNode(Node.NFORL);
+        check("TFORK");
+        check("TLPAR");
+        node.setLeft(asgnlist());
+        check("TESMI");
+        node.setMiddle(bool());
+        check("TRPAR");
+        node.setRight(stats());
+        check("TENDK");
+        return node;
+    }
+    private TreeNode repstat(){
+        TreeNode node = new TreeNode(Node.NREPT);
+        check("TREPT");
+        check("TLPAR");
+        node.setLeft(asgnlist());
+        check("TRPAR");
+        node.setMiddle(stats());
+        check("TUNTL");
+        node.setRight(bool());
+        return node;
+    }
+    private TreeNode asgnlist(){
+        if(check("something")) {//TODO
+            return alist();
+        }
+        return null;
+    }
+    private TreeNode alist(){
+        TreeNode node = new TreeNode(Node.NASGNS);
+        node.setLeft(asgnstat());
+        node.setRight(alisttail());
+        return node;
+    }
+    private TreeNode alisttail(){
+        if(check("TCOMA")){
+            return alist();
+        }
+        return null;
+    }
+    private TreeNode ifstat(){
+        TreeNode node = new TreeNode(Node.NIFTH);
+        check("TIFKW");
+        check("TLPAR");
+        node.setLeft(bool());
+        check("TRPAR");
+        node.setMiddle(stats());
+        node.setRight(elsestat());
+        check("TENDK");
+        return node;
+    }
+    private TreeNode elsestat(){
+        if(check("TELSE")){
+            return stats();
+        }
+        return null;
+    }
+    private TreeNode asgnstat(){
+        TreeNode node = new TreeNode(Node.NASGN);
+        node.setLeft(var());
+        check("TASGN");
+        node.setRight(bool());
+        return node;
+    }
+    private TreeNode idasgnstat(){
+        TreeNode node = new TreeNode(Node.NASGN);
+        check("TASGN");
+        node.setLeft(bool());
+        return node;
+    }
+    private TreeNode iostat(){
+        TreeNode node = new TreeNode(Node.NINPUT);
+        if(check("TINKW")) {
+            check("TINPT");
+            node.setLeft(vlist());
+
+        }else if(check("TOUTP")){
+            node = new TreeNode(Node.NOUTP);
+            check("TASGN");
+        }
+        return node;
+    }
+    private TreeNode iostatmid(){
+        //TODO
+        //Special	<iostatmid>	::=	<prlist> <iostatpr>
+        //NOUTL 	<iostatmid>	::=	Line
+        return null;
+    }
+    private TreeNode iostatpr(){
+        TreeNode node = new TreeNode(Node.NOUTL);
+        if(check("TINPT") && check("TOUTL")){
+            return node;
+        }
+        return null;
+    }
+    private TreeNode callstat(){
+        TreeNode node = new TreeNode(Node.NCALL);
+        check("TLPAR");
+        node.setLeft(callstatelist());
+        check("TRPAR");
+        return node;
+    }
+    private TreeNode callstatelist(){
+        if(check("something")){//TODO
+            return elist();
+        }
+        return null;
+    }
+    private TreeNode returnstat(){
+        TreeNode node = new TreeNode(Node.NRETN);
+        check("TRETN");
+        node.setLeft(returnstattail());
+        return node;
+    }
+    private TreeNode returnstattail(){
+        if(check("something")){//TODO
+            return expr();
+        }
+        return null;
+    }
+    private TreeNode vlist(){
+        TreeNode node = new TreeNode(Node.NVLIST);
+        node.setLeft(var());
+        node.setRight(vlisttail());
+        return node;
+    }
+    private TreeNode vlisttail(){
+        if(check("TCOMA")){
+            return vlist();
+        }
+        return null;
+    }
+    private TreeNode var(){
+        TreeNode node = new TreeNode(Node.NSIMV);
+        check("TIDNT"); //TODO idnt stuff
+        node.setLeft(vararr());
+        return node;
+    }
+    private TreeNode vararr(){
+        if(!check("TLBRK")){
+            return null;
+        }
+        TreeNode node = new TreeNode(Node.NAELT);
+        node.setLeft(expr());
+        check("TRBRK");
+        node.setRight(vararrvar());
+        return node;
+    }
+    private TreeNode vararrvar(){
+        TreeNode node = new TreeNode(Node.NARRV);
+        if(check("TCOMA")){
+            //todo some id shit, idk.
+            return node;
+        }
+        return null;
+    }
+    private TreeNode elist(){
+        TreeNode node = new TreeNode(Node.NEXPL);
+        node.setLeft(bool());
+        node.setRight(elisttail());
+        return node;
+    }
+    private TreeNode elisttail(){
+        if(check("TCOMA")){
+            return elist();
+        }
+        return null;
+    }
+    private TreeNode bool(){
+
+    }
     private TreeNode booltail(){}
     private TreeNode rel(){} //TODO: fix NNOT
     private TreeNode reltail(){}
-    private TreeNode logop(){}
-    private TreeNode relop(){}
+    private TreeNode logop(){
+        TreeNode node = null;
+        if(check("TANDK")){
+            node = new TreeNode(Node.NAND);
+        }else if(check("TORKW")){
+            node = new TreeNode(Node.NOR);
+        }else if(check("TXORK")){
+            node = new TreeNode(Node.NXOR);
+        }
+        return node;
+    }
+    private TreeNode relop(){
+        TreeNode node = null;
+        if(check("TDEQL")){
+            node = new TreeNode(Node.NEQL);
+        }else if(check("TNEQL")){
+            node = new TreeNode(Node.NNEQ);
+        }else if(check("TGRTR")){
+            node = new TreeNode(Node.NGRT);
+        }else if(check("TLEQL")){
+            node = new TreeNode(Node.NLEQ);
+        }else if(check("TLESS")){
+            node = new TreeNode(Node.NLSS);
+        }else if(check("TGREQ")){
+            node = new TreeNode(Node.NGEQ);
+        }
+        return node;
+    }
     private TreeNode expr(){}
     private TreeNode exprtail(){}
     private TreeNode term(){}

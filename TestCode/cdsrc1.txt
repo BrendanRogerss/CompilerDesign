@@ -9,7 +9,7 @@
 /--	M. Hannaford
 /--	23-Jul-2016
 /--
-/--     P. Mahata 
+/--     P. Mahata
 /--     Modified: 21-Jul-2017
 /--
 /--     Part 1 - The 31 Keywords
@@ -55,4 +55,3 @@ begin
 		/-- Do something else
 
 end CD Ex1
-
