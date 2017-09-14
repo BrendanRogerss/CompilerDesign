@@ -465,7 +465,7 @@ public class Parser {
         return null;
     }
     private TreeNode bool(){
-
+        //Special	<bool>	::=	<rel><booltail>
     }
     private TreeNode booltail(){}
     private TreeNode rel(){} //TODO: fix NNOT
@@ -508,7 +508,18 @@ public class Parser {
     private TreeNode idexp(){}
     private TreeNode fncall(){}
     private TreeNode fncalllist(){}
-    private TreeNode prlist(){}
-    private TreeNode prlisttail(){}
+    private TreeNode prlist(){
+        TreeNode node = new TreeNode(Node.NPRLST);
+        node.setLeft(printitem());
+        node.setRight(prlisttail());
+        return node;
+    }
+    private TreeNode prlisttail(){
+        if(check("TCOMA")){
+            return null;
+        }
+        return prlist();
+
+    }
     private TreeNode printitem(){}
 }
