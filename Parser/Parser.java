@@ -26,6 +26,8 @@ public class Parser {
     }
 
 
+
+
     private TreeNode program(){
         check("TCD");
         //TODO: something with <id>
@@ -182,18 +184,35 @@ public class Parser {
     }
     private TreeNode udecl(){
         check("TIDNT");
+        //TODO
         check("TCOMA");
         return udecltail();
     }
     private TreeNode udecltail(){
-        //todo: this nonsense
+        //todo: this
+        if(check("TIDNT")){
+            return new TreeNode(Node.NARRD);//TODO:typeid
+            //NARRD	    <udecltail>	::=	<typeid>
+        }
+        //check("");????
+
+
         //NSDECL	<udecltail>	::=	<stype>
-        //NARRD	    <udecltail>	::=	<typeid>
+
         return null;
     }
     private TreeNode func(){
         //NFUND	<func>	::=	func  <id> ( <plist> ) : <rtype> <funcbody>
-        return null;
+        TreeNode node = new TreeNode(Node.NFUND);
+        check("TFUNC");
+        //todo: id
+        check("TLPAR");
+        node.setLeft(plist());
+        check("TRPAR");
+        check("TCOLN");
+        //todo rtype
+        funcbody(node);
+        return node;
     }
     private TreeNode rtype(){
         //Special <rtype>	::=	<stype>
@@ -224,7 +243,7 @@ public class Parser {
         //NARRC	<param>	::=	const <arrdecl>
         return null;
     }
-    private TreeNode funcbody(){
+    private TreeNode funcbody(TreeNode nfund){
         //Special	<funcbody>	::=	<locals> begin <stats> end
         return null;
     }
@@ -275,16 +294,22 @@ public class Parser {
         return null;
     }
     private TreeNode strstat(){
-        //Special	<strstat>	::=	<forstat>
-        //Special	<strstat>	::=	<ifstat>
-        return null;
+        if(check("TIFKW")){
+            return ifstat();
+        }
+        check("TFORK");
+        return forstat();
     }
     private TreeNode stat(){
-        //Special	<stat>	::=	<reptstat>
-        //Special	<stat>	::=	<idstat>
-        //Special	<stat>	::=	<iostat>
-        //Special	<stat>	::=	<returnstat>
-        return null;
+        if(check("TREPT")){
+            return repstat();
+        }else if(check("TIDNT")){
+            return idstat();
+        }else if(check("TINKW") || check("TOUTP")){
+            return iostat();
+        }
+        check("TRETN");
+        return returnstat();
     }
     private TreeNode idstat(){
         //Special	<idstat>	::=	<id> <idtail>
@@ -292,6 +317,10 @@ public class Parser {
     }
     private TreeNode idtail(){
         //Special	<idtail>	::=	<varrarr> <idasgnstat>
+        if(check("TLPAR")){
+            return callstat();
+        }
+
         //Special	<idtail>	::=	<callstat>
         return null;
     }
