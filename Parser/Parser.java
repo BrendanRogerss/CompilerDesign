@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class Parser {
 
     private ArrayList<Token> tokens;
+    private SymbolTable symbolTable = new SymbolTable();
 
     public Parser(ArrayList<Token> t) {
         tokens = t;
@@ -23,7 +24,7 @@ public class Parser {
             return true;
         }
         if (throwError) {
-            //throw error
+            System.out.println("Error: Unexpected token. Wanted: "+tok+" got: "+tokens.get(0).tok);
         }
         return false;
     }
@@ -314,7 +315,7 @@ public class Parser {
         return udecl();
     }
 
-    private TreeNode stype() {
+    private String stype() {
         //TODO
         //Special	<stype>	::=	integer
         //Special	<stype>	::=	real

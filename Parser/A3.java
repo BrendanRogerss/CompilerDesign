@@ -7,7 +7,7 @@ public class A3 {
 
 
     private A1 scanner = new A1();
-    private ArrayList<String> tokens;
+    private ArrayList<Token> tokens;
     private Parser parser;
 
 

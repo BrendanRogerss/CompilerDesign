@@ -148,7 +148,7 @@ public class Scanner {
                         buffer = "";
                         while(!buffer.contains("*-/")){
                             if(r.eof()){ //hit the end of file, ERROR!!1!!!1one
-                                A1.out.print("Reached end of line while parsing multi line comment. Comment starts on line: "+start);
+                                A1.out.printError("Reached end of line while parsing multi line comment. Comment starts on line: "+start);
                                 return null;
                             }
                             buffer += r.get();
