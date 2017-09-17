@@ -39,10 +39,15 @@ public class Parser {
         return false;
     }
 
+    public void setStRec(TreeNode node){
+        String v = tokens.get(0).value;
+        tokens.remove(0);
+    }
+
 
     private TreeNode program() {
         check("TCD", true);
-        //TODO: something with <id>
+        //TODO id
         TreeNode node = new TreeNode(Node.NPROG);
         node.setLeft(globals());
         node.setMiddle(funcs());
