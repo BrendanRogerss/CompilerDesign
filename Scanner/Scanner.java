@@ -47,7 +47,7 @@ public class Scanner {
     }
 
     //returns the next token
-    public String getToken() throws IOException {
+    public Token getToken() throws IOException {
         String buffer = "";
         String character;
 

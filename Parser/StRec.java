@@ -12,5 +12,6 @@ public class StRec {
 
     public StRec(String s, double d, int i){}
     public StRec(String s, double d){}
+    public StRec(String s, int v, int ln){}
 
 }

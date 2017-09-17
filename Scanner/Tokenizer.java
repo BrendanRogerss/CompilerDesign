@@ -27,37 +27,37 @@ public class Tokenizer {
         }
     }
 
-    public String getToken(String token){
-        String output = "";
+    public Token getToken(String token){
+        Token output;
         String keyword = literals.get(token.toUpperCase()); //check if the token was a keyword or delimiter
         if(keyword != null){
-            output = keyword;
+            output = new Token(keyword);
 
         }else if(token.substring(0,1).equals("\"")){ //check if string
             //string
-            output = "TSTRG "+token;
+            output = new Token("TSTRG",token);
         }else if(Character.isDigit(token.charAt(0))){
             //token is an int or float
             if(token.contains("22")){ //float
                 if(token.substring(0,1).equals("0")&&!token.substring(1,2).equals(".")){//needs 2 leading 0s to be undefined
-                    output = "TUNDF " + token;
+                    output = new Token("TUNDF",token);
                 }else {
-                    output = "TFLIT " + token;
+                    output = new Token("TFLIT",token);
                 }
             }else{ //int
                 if(token.substring(0,1).equals("0") && token.length()>1){ //check leading 0
-                    output = "TUNDF " + token;
+                    output = new Token("TUNDF",token);
                 }else {
-                    output = "TILIT " + token;
+                    output =  new Token("TILIT",token);
                 }
             }
 
         }else if(Character.isAlphabetic(token.charAt(0))) {
             //variable
-            output = "TIDNT " + token;
+            output =  new Token("TIDNT",token);
 
         }else{
-            output = "TUNDF " + token; //undefined token
+            output = new Token("TUNDF",token); //undefined token
         }
         return output;
     }

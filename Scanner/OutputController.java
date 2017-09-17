@@ -3,7 +3,7 @@ public class OutputController {
     private int col = 0;
 
     //prints each token according to the specification
-    public void print(String s){
+    public void print(Token s){
         if(s==null){
             return;
         }

@@ -10,7 +10,7 @@ public class A1 {
     private Scanner scanner;
     private InputController inputController;
     static OutputController out = new OutputController();
-    static ArrayList<String> tokens = new ArrayList<>();
+    static ArrayList<Token> tokens = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
         A1 run = new A1();
@@ -19,7 +19,7 @@ public class A1 {
 
     }
 
-    public ArrayList<String> run(String filename) {
+    public ArrayList<Token> run(String filename) {
 
         try{
             inputController = new InputController(filename); //instantiate some objects
@@ -29,7 +29,7 @@ public class A1 {
             while (!scanner.eof()) { //loop until the file ends
                 out.print(scanner.getToken()); //get token and send it to the output controller
             }
-            out.print("TEOF"); //send out the EOD token
+            out.print(new Token("TEOF")); //send out the EOD token
         }catch (Exception e){
 
         }
