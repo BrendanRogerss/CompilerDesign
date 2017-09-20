@@ -2,6 +2,8 @@ import sun.reflect.generics.tree.Tree;
 
 import java.util.ArrayList;
 
+import static com.sun.corba.se.impl.util.Utility.printStackTrace;
+
 /**
  * Created by Brendan on 9/9/17.
  */
@@ -9,13 +11,14 @@ public class Parser {
 
     private ArrayList<Token> tokens;
     private SymbolTable symbolTable = new SymbolTable();
+    TreeNode root;
 
     public Parser(ArrayList<Token> t) {
         tokens = t;
     }
 
     public void run() {
-
+        root = program();
     }
 
     public boolean check(String tok, boolean throwError) {
@@ -25,6 +28,8 @@ public class Parser {
         }
         if (throwError) {
             System.out.println("Error: Unexpected token. Wanted: "+tok+" got: "+tokens.get(0).tok);
+            printStackTrace();
+            System.exit(1);
         }
         return false;
     }
@@ -44,10 +49,10 @@ public class Parser {
         tokens.remove(0);
     }
 
-
     private TreeNode program() {
         check("TCD", true);
         //TODO id
+        check("TIDNT",true);
         TreeNode node = new TreeNode(Node.NPROG);
         node.setLeft(globals());
         node.setMiddle(funcs());
@@ -89,6 +94,7 @@ public class Parser {
     private TreeNode init() {
         TreeNode node = new TreeNode(Node.NINIT);
         //TODO:deal with <id>
+        check("TIDNT",true);
         check("TISKW", true);
         node.setLeft(expr());
         return node;
@@ -123,6 +129,7 @@ public class Parser {
         node.setRight(stats()); //maybe middle?
         check("end cd", true);
         //TODO: something about an id
+        check("TIDNT",true);
         return node;
 
     }
@@ -149,7 +156,7 @@ public class Parser {
     }
 
     private TreeNode typelisttail() {
-        if (check("TIDNT", false)) {
+        if (checkAndNotConsume("TIDNT", false)) {
             return typelist();
         }
         return null;
@@ -157,11 +164,12 @@ public class Parser {
 
     private TreeNode type() {
         //TODO: id stuff
+        check("TIDNT",true);
         check("TISKW", true);
         return typetail();
     }
 
-    private TreeNode typetail() {
+    private TreeNode typetail(TreeNode typeNode) {
         TreeNode node = new TreeNode(Node.NATYPE);
         if (check("TARRY", false)) {
             check("TLBRK", true);
@@ -169,6 +177,7 @@ public class Parser {
             check("TRBRK", true);
             check("TOFKW", true);
             //node.setRight(); TODO struct id
+            check("TIDNT",true);
         } else {
             node = new TreeNode(Node.NRTYPE);
             node.setLeft(fields());
@@ -194,8 +203,9 @@ public class Parser {
     private TreeNode sdecl() {
         TreeNode node = new TreeNode(Node.NSDECL);
         //node.setLeft(); todo: id
+        check("TIDNT",true);
         check("TCOLN", true);
-        node.setRight(stype());
+        stype();//todo: some type shit?
         return node;
     }
 
@@ -224,12 +234,20 @@ public class Parser {
     private TreeNode udecl() {
         check("TIDNT", true);
         //TODO
-        check("TCOMA", true);
-        return udecltail();
+        check("TCOLN", true);
+        TreeNode node = null;
+        if (check("TIDNT", false)) {
+            node = new TreeNode(Node.NARRD); //todo lots of id shit
+            return node;
+        }
+        node = new TreeNode(Node.NSDECL);
+        stype();//todo: stype shit
+        return node;
     }
-
+/*
     private TreeNode udecltail() {
         //todo: this
+        System.out.println("udecltail");
         if (check("TIDNT", false)) {
             return new TreeNode(Node.NARRD);//TODO:typeid
             //NARRD	    <udecltail>	::=	<typeid>
@@ -241,30 +259,35 @@ public class Parser {
 
         return null;
     }
+    */
 
     private TreeNode func() {
         //NFUND	<func>	::=	func  <id> ( <plist> ) : <rtype> <funcbody>
         TreeNode node = new TreeNode(Node.NFUND);
         check("TFUNC", true);
         //todo: id
+        check("TIDNT",true);
         check("TLPAR", true);
         node.setLeft(plist());
         check("TRPAR", true);
         check("TCOLN", true);
         //todo rtype
-        funcbody(node);
-        return node;
+        rtype(); //todo?
+        return funcbody(node);
     }
 
-    private TreeNode rtype() {
-        //Special <rtype>	::=	<stype>
-        //Special <rtype>	::=	void
-        return null;
+    private String rtype() {
+        if(check("TVOID",false)){
+            return "VOID";
+        }
+        return stype();
+
     }
 
     private TreeNode plist() {
-        //Special <plist>	::=	<params>
-        //Special <plist>	::=	epsilon
+        if(checkAndNotConsume("TIDNT",false)||check("TCNST",false)){
+            return params();
+        }
         return null;
     }
 
@@ -283,21 +306,32 @@ public class Parser {
     }
 
     private TreeNode param() {
-        //TODO
-        //NSIMP	<param>	::=	<udecl>
-        //NARRP	<param>	::=	<udecl>
-        //NARRC	<param>	::=	const <arrdecl>
-        return null;
+        if(check("TCNST",false)){
+            TreeNode node = new TreeNode(Node.NARRC);
+            node.setLeft(arrdecl());
+            return node;
+        }
+        TreeNode node = udecl();
+        if(node.getValue() == Node.NSDECL){ //todo: find a better way
+            node.setValue(Node.NSIMP);
+        }else{
+            node.setValue(Node.NARRP);
+        }
+        return node;
     }
 
-    private TreeNode funcbody(TreeNode nfund) {
-        //Special	<funcbody>	::=	<locals> begin <stats> end
-        return null;
+    private TreeNode funcbody(TreeNode nfunc) {
+        nfunc.setMiddle(locals());
+        check("TBEGN",true);
+        nfunc.setRight(stats());
+        check("TENDK",true);
+        return nfunc;
     }
 
     private TreeNode locals() {
-        //Special	<locals>	::=	<dlist>
-        //Special	<locals>	::=	epsilon
+        if(checkAndNotConsume("TIDNT",false)){
+            return dlist();
+        }
         return null;
     }
 
@@ -322,6 +356,8 @@ public class Parser {
 
     private String stype() {
         //TODO
+        //consume();
+        tokens.remove(0);
         //Special	<stype>	::=	integer
         //Special	<stype>	::=	real
         //Special	<stype>	::=	boolean
@@ -330,29 +366,28 @@ public class Parser {
 
     private TreeNode stats() {
         TreeNode node = new TreeNode(Node.NSTATS);
-        if (check("whateverthefuckgoeshere", false)) {//TODO
-            node.setLeft(stat());
-            check("TSEMI", true);
-            node.setRight(statstail());
-        } else {
+        if (checkAndNotConsume("TFORK", false) || checkAndNotConsume("TIFKW",false)) {//TODO
             node.setLeft(strstat());
-            node.setRight(statstail());
+        } else{
+            node.setLeft(stat());
+            check("TSEMI",true);
         }
+        node.setRight(statstail());
         return node;
     }
 
     private TreeNode statstail() {
-        if (check("TIDNT", false)) {
-            return stats();
+        if (check("TENDK", false) || check("TUNTL",false) || check("TELSE",false)) {
+            return null;
         }
-        return null;
+        return stats();
     }
 
     private TreeNode strstat() {
-        if (check("TIFKW", false)) {
+        if (checkAndNotConsume("TIFKW", false)) {
             return ifstat();
         }
-        check("TFORK", true);
+        checkAndNotConsume("TFORK", true);
         return forstat();
     }
 
@@ -369,18 +404,18 @@ public class Parser {
     }
 
     private TreeNode idstat() {
-        //Special	<idstat>	::=	<id> <idtail>
-        return null;
+        TreeNode node = new TreeNode(Node.NUNDEF);
+        if(checkAndNotConsume("TIDNT",false)){
+            //todo: id shit
+        }
+        return idtail(node);
     }
 
-    private TreeNode idtail() {
-        //Special	<idtail>	::=	<varrarr> <idasgnstat>
+    private TreeNode idtail(TreeNode id) {
         if (check("TLPAR", false)) {
-            return callstat();
+            return callstat(id);
         }
-
-        //Special	<idtail>	::=	<callstat>
-        return null;
+        return idasgnstat(vararr(id));
     }
 
     private TreeNode forstat() {
@@ -388,7 +423,7 @@ public class Parser {
         check("TFORK", true);
         check("TLPAR", true);
         node.setLeft(asgnlist());
-        check("TESMI", true);
+        check("TSEMI", true);
         node.setMiddle(bool());
         check("TRPAR", true);
         node.setRight(stats());
@@ -409,7 +444,7 @@ public class Parser {
     }
 
     private TreeNode asgnlist() {
-        if (check("something", false)) {//TODO
+        if (checkAndNotConsume("TIDNT", false)) {//TODO
             return alist();
         }
         return null;
@@ -442,6 +477,7 @@ public class Parser {
     }
 
     private TreeNode elsestat() {
+        //todo ########################### might need to pass node through
         if (check("TELSE", false)) {
             return stats();
         }
@@ -456,7 +492,7 @@ public class Parser {
         return node;
     }
 
-    private TreeNode idasgnstat() {
+    private TreeNode idasgnstat(TreeNode varNode) {
         TreeNode node = new TreeNode(Node.NASGN);
         check("TASGN", true);
         node.setLeft(bool());
@@ -476,14 +512,14 @@ public class Parser {
         return node;
     }
 
-    private TreeNode iostatmid() {
+    private TreeNode iostatmid(TreeNode outNode) {
         //TODO
         //Special	<iostatmid>	::=	<prlist> <iostatpr>
         //NOUTL 	<iostatmid>	::=	Line
         return null;
     }
 
-    private TreeNode iostatpr() {
+    private TreeNode iostatpr(TreeNode outNode) {
         TreeNode node = new TreeNode(Node.NOUTL);
         if (check("TINPT", false) && check("TOUTL", false)) {
             return node;
@@ -491,7 +527,7 @@ public class Parser {
         return null;
     }
 
-    private TreeNode callstat() {
+    private TreeNode callstat(Node callNode) {
         TreeNode node = new TreeNode(Node.NCALL);
         check("TLPAR", true);
         node.setLeft(callstatelist());
@@ -541,21 +577,22 @@ public class Parser {
         return node;
     }
 
-    private TreeNode vararr() {
-        if (!check("TLBRK", false)) {
-            return null;
+    private TreeNode vararr(TreeNode n) {
+        if (check("TLBRK", false)) {
+            TreeNode node = new TreeNode(Node.NAELT);
+            node.setLeft(expr());
+            check("TRBRK", true);
+            node.setRight(vararrvar());
+            return node;
         }
-        TreeNode node = new TreeNode(Node.NAELT);
-        node.setLeft(expr());
-        check("TRBRK", true);
-        node.setRight(vararrvar());
-        return node;
+        return null;
     }
 
-    private TreeNode vararrvar() {
+    private TreeNode vararrvar(TreeNode vararrNode) {
         TreeNode node = new TreeNode(Node.NARRV);
         if (check("TCOMA", false)) {
             //todo some id shit, idk.
+            check("TIDNT",true);
             return node;
         }
         return null;
@@ -576,19 +613,39 @@ public class Parser {
     }
 
     private TreeNode bool() {
-        //Special	<bool>	::=	<rel><booltail>
+        return booltail(rel());
     }
 
-    private TreeNode booltail() {
+    private TreeNode booltail(TreeNode relNode) {
+        if(check("TANDK",false)||check("TORKW",false)||check("TXORK",false)){
+            TreeNode node = logop(relNode);
+            node.setRight(rel());
+            return booltail(node);
+        }
+        return relNode;
     }
 
     private TreeNode rel() {
+        if(check("TNOTK",false)){
+            TreeNode node = new TreeNode(Node.NNOT);
+            node.setMiddle(rel());
+            return node;
+        }
+        return reltail(expr());
     } //TODO: fix NNOT
 
-    private TreeNode reltail() {
+    private TreeNode reltail(TreeNode expr) {
+        if(checkAndNotConsume("TDEQL",false)||checkAndNotConsume("TNEQL",false)||checkAndNotConsume("TGRTR",false)||
+                checkAndNotConsume("TLEQL",false)|| checkAndNotConsume("TLESS",false) ||
+                checkAndNotConsume("TGREQ",false)){
+            TreeNode node = relop(expr);
+            node.setRight(expr());
+            return  node;
+        }
+        return expr;
     }
 
-    private TreeNode logop() {
+    private TreeNode logop(TreeNode rel) {
         TreeNode node = null;//todo check true / false
         if (check("TANDK", false)) {
             node = new TreeNode(Node.NAND);
@@ -597,10 +654,11 @@ public class Parser {
         } else if (check("TXORK", false)) {
             node = new TreeNode(Node.NXOR);
         }
+        node.setLeft(rel);
         return node;
     }
 
-    private TreeNode relop() {
+    private TreeNode relop(TreeNode expr) {
         TreeNode node = null;
         if (check("TDEQL", false)) {
             node = new TreeNode(Node.NEQL);
@@ -615,37 +673,135 @@ public class Parser {
         } else if (check("TGREQ", false)) {
             node = new TreeNode(Node.NGEQ);
         }
+
+        if(node == null){
+            System.out.println(tokens.get(0).tok);
+        }
+        node.setLeft(expr);
         return node;
     }
 
+    //todo: try and remove passing node
     private TreeNode expr() {
+        return exprtail(term());
     }
 
-    private TreeNode exprtail() {
+    private TreeNode exprtail(TreeNode term) {
+        if(check("TADDT",false)){
+            TreeNode node = new TreeNode(Node.NADD);
+            node.setLeft(term);
+            node.setRight(term());
+            return exprtail(node);
+        }else if(check("TSUBT",false)){
+            TreeNode node = new TreeNode(Node.NSUB);
+            node.setLeft(term);
+            node.setRight(term());
+            return exprtail(node);
+        }else{
+            return term;
+        }
     }
-
+    //todo: try and remove passing node
     private TreeNode term() {
+        return termtail(fact());
     }
 
-    private TreeNode termtail() {
+    private TreeNode termtail(TreeNode fact) {
+
+        if(check("TMULT",false)){
+            TreeNode node = new TreeNode(Node.NMUL);
+            node.setLeft(fact);
+            node.setRight(term());
+            return termtail(node);
+        }else if(check("TDIVT",false)){
+            TreeNode node = new TreeNode(Node.NDIV);
+            node.setLeft(fact);
+            node.setRight(term());
+            return termtail(node);
+        }else if(check("TPERC",false)){
+            TreeNode node = new TreeNode(Node.NMOD);
+            node.setLeft(fact);
+            node.setRight(term());
+            return termtail(node);
+        }
+        return fact;
     }
 
     private TreeNode fact() {
+        return facttail(exponent());
     }
 
-    private TreeNode facttail() {
+    private TreeNode facttail(TreeNode exp) {
+        if(check("TCART",false)){
+            TreeNode node = new TreeNode(Node.NPOW);
+            node.setLeft(exp);
+            node.setRight(exponent());
+            return facttail(node);
+        }
+        return exp;
     }
 
     private TreeNode exponent() {
+        if(check("TIDNT",false)){
+            return idexp();
+        }else if(check("TILIT",false)){
+            //todo symbol table shit
+            TreeNode node = new TreeNode(Node.NILIT);
+            return node;
+        }else if(check("TTRUE",false)){
+            TreeNode node = new TreeNode(Node.NFLIT);
+            return node;
+        }else if(check("TFALS",false)){
+            TreeNode node = new TreeNode(Node.NTRUE);
+            return node;
+        }else if(check("TLPAR",false)){
+            TreeNode bool = bool();
+            check("TRPAR",true);
+            return bool;
+        }else{
+            //todo: throw error??
+        }
+        return null;
     }
 
     private TreeNode idexp() {
+        TreeNode node = new TreeNode(Node.NUNDEF);
+        if(check("TIDNT",false)){
+            //todo id stuff, should be checkandnotconsume
+        }
+        return idexptail(node);
     }
 
-    private TreeNode fncall() {
+    private TreeNode idexptail(TreeNode idexp){
+        TreeNode node;
+        if(check("TLPAR",false)){
+            return fncall(idexp);
+        }else{
+            node = vararr();
+            if(node==null){
+
+            }
+        }
+        return idexp;
+
+    }
+
+    private TreeNode fncall(TreeNode idexp) {
+
+        idexp.setValue(Node.NFCALL);
+        check("TLPAR",true);
+        idexp.setMiddle(fncalllist());
+        check("TRPAR",true);
+
+        return idexp;
     }
 
     private TreeNode fncalllist() {
+        if(check("TNOTK",false) || check("TIDNT",false)||check("TFLIT",false)||check("TILIT",false) ||
+                check("TTRUE",false) || check("TFALS",false)||check("TLPAR",false)){
+            return elist();
+        }
+        return null;
     }
 
     private TreeNode prlist() {
@@ -664,5 +820,6 @@ public class Parser {
     }
 
     private TreeNode printitem() {
+        return null;
     }
 }

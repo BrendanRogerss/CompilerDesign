@@ -3,12 +3,17 @@ public class OutputController {
     private int col = 0;
 
     //prints each token according to the specification
-    public void print(Token s){
-        if(s==null){
+    public void print(Token t){
+        if(t==null){
             return;
         }
-        A1.tokens.add(s);
-        /*else if(s.contains("TUNDF")){//output an undefined token
+        A1.tokens.add(t);
+
+        String s = t.tok;
+        if(t.value!=null){
+            s+= " "+t.value;
+        }
+        else if(s.contains("TUNDF")){//output an undefined token
             System.out.println("\n"+s);
             col=0;
             return;
@@ -23,7 +28,7 @@ public class OutputController {
         }
         col+=s.length();
         System.out.print(s);
-        */
+
     }
 
     //prints errors

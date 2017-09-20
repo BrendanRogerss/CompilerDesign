@@ -7,7 +7,6 @@ public class SymbolTable {
 
     }
 
-
     public void add(StRec stRec){
 
     }
