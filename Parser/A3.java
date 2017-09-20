@@ -21,7 +21,9 @@ public class A3 {
         parser = new Parser(tokens);
         parser.run();
         System.out.println();
-        printTree(parser.root, 0);
+//        printTree(parser.root, 0);
+        System.out.println();
+        printSpace(parser.root);
     }
 
     public void printTree(TreeNode root, int indent){
@@ -37,6 +39,15 @@ public class A3 {
             printTree(root.getRight(), indent+4);
         }
 
+    }
+
+    public void printSpace(TreeNode node){
+        if(node != null) {
+            System.out.print(node.getValue() + " ");
+            printSpace(node.getLeft());
+            printSpace(node.getMiddle());
+            printSpace(node.getRight());
+        }
     }
 
 }
