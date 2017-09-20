@@ -20,15 +20,21 @@ public class A3 {
         tokens = scanner.run("TestCode/cdsrc99.txt");
         parser = new Parser(tokens);
         parser.run();
-        printTree(parser.root);
+        System.out.println();
+        printTree(parser.root, 0);
     }
 
-    public void printTree(TreeNode root){
+    public void printTree(TreeNode root, int indent){
         if(root!=null) {
-            System.out.println(root.getValue());
-            printTree(root.getLeft());
-            printTree(root.getMiddle());
-            printTree(root.getRight());
+            String space = "";
+            for (int i = 0; i < indent-1; i++) {
+                space+=i%3==0?"|":" ";
+            }
+            //space+="\\";
+            System.out.println(space+root.getValue());
+            printTree(root.getLeft(), indent+4);
+            printTree(root.getMiddle(), indent+4);
+            printTree(root.getRight(), indent+4);
         }
 
     }

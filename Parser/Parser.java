@@ -115,7 +115,7 @@ public class Parser {
     private TreeNode funcs() {
         TreeNode node = new TreeNode(Node.NFUNCS);
         node.setLeft(func());
-        if (check("TFUNC", false)) {
+        if (checkAndNotConsume("TFUNC", false)) {
             node.setRight(funcs());
         }
         return node;
@@ -125,10 +125,11 @@ public class Parser {
         check("TMAIN", true);
         TreeNode node = new TreeNode(Node.NMAIN);
         node.setLeft(slist());
-        check("begin", true);
+        check("TBEGN", true);
         node.setRight(stats()); //maybe middle?
-        check("end cd", true);
+        check("TENDK", true);
         //TODO: something about an id
+        check("TCD",true);
         check("TIDNT",true);
         return node;
 
@@ -169,7 +170,7 @@ public class Parser {
         return typetail();
     }
 
-    private TreeNode typetail(TreeNode typeNode) {
+    private TreeNode typetail() {//todo may need to pass in type
         TreeNode node = new TreeNode(Node.NATYPE);
         if (check("TARRY", false)) {
             check("TLBRK", true);
@@ -377,7 +378,8 @@ public class Parser {
     }
 
     private TreeNode statstail() {
-        if (check("TENDK", false) || check("TUNTL",false) || check("TELSE",false)) {
+        if (checkAndNotConsume("TENDK", false) || checkAndNotConsume("TUNTL",false) ||
+                checkAndNotConsume("TELSE",false)) {
             return null;
         }
         return stats();
@@ -392,27 +394,27 @@ public class Parser {
     }
 
     private TreeNode stat() {
-        if (check("TREPT", false)) {
+        if (checkAndNotConsume("TREPT", false)) {
             return repstat();
-        } else if (check("TIDNT", false)) {
+        } else if (checkAndNotConsume("TIDNT", false)) {
             return idstat();
-        } else if (check("TINKW", false) || check("TOUTP", false)) {
+        } else if (checkAndNotConsume("TINKW", false) || checkAndNotConsume("TOUTP", false)) {
             return iostat();
         }
-        check("TRETN", true);
+        checkAndNotConsume("TRETN", true);
         return returnstat();
     }
 
     private TreeNode idstat() {
         TreeNode node = new TreeNode(Node.NUNDEF);
-        if(checkAndNotConsume("TIDNT",false)){
+        if(check("TIDNT",false)){
             //todo: id shit
         }
         return idtail(node);
     }
 
     private TreeNode idtail(TreeNode id) {
-        if (check("TLPAR", false)) {
+        if (checkAndNotConsume("TLPAR", false)) {
             return callstat(id);
         }
         return idasgnstat(vararr(id));
@@ -444,7 +446,7 @@ public class Parser {
     }
 
     private TreeNode asgnlist() {
-        if (checkAndNotConsume("TIDNT", false)) {//TODO
+        if (checkAndNotConsume("TIDNT", false)) {
             return alist();
         }
         return null;
@@ -494,51 +496,62 @@ public class Parser {
 
     private TreeNode idasgnstat(TreeNode varNode) {
         TreeNode node = new TreeNode(Node.NASGN);
+        node.setLeft(varNode);
         check("TASGN", true);
-        node.setLeft(bool());
+        node.setRight(bool());
         return node;
     }
 
     private TreeNode iostat() {
-        TreeNode node = new TreeNode(Node.NINPUT);
+
         if (check("TINKW", false)) {
+            TreeNode node = new TreeNode(Node.NINPUT);
             check("TINPT", true);
             node.setLeft(vlist());
-
+            return node;
         } else if (check("TOUTP", false)) {//TODO: check true / flase
-            node = new TreeNode(Node.NOUTP);
+            TreeNode node = new TreeNode(Node.NOUTP);
             check("TASGN", true);
+            return iostatmid(node);
         }
-        return node;
+        System.out.println("Error in istat??");
+        return null;
     }
 
     private TreeNode iostatmid(TreeNode outNode) {
-        //TODO
-        //Special	<iostatmid>	::=	<prlist> <iostatpr>
-        //NOUTL 	<iostatmid>	::=	Line
-        return null;
+        if(check("TOUTL",false)){
+            outNode.setValue(Node.NOUTL);
+        }else{
+            outNode.setMiddle(prlist());
+            outNode = iostatpr(outNode);
+        }
+        return outNode;
     }
 
     private TreeNode iostatpr(TreeNode outNode) {
-        TreeNode node = new TreeNode(Node.NOUTL);
-        if (check("TINPT", false) && check("TOUTL", false)) {
-            return node;
+        if (check("TASGN", false) && check("TOUTL", false)) {
+            outNode.setValue(Node.NOUTL);
         }
-        return null;
+        return outNode;
     }
 
-    private TreeNode callstat(Node callNode) {
-        TreeNode node = new TreeNode(Node.NCALL);
+    private TreeNode callstat(TreeNode callNode) {
+        callNode.setValue(Node.NCALL);
         check("TLPAR", true);
-        node.setLeft(callstatelist());
+        callNode.setLeft(callstatelist());
         check("TRPAR", true);
-        return node;
+        return callNode;
     }
 
     private TreeNode callstatelist() {
-        if (check("something", false)) {//TODO
-            return elist();
-        }
+        if (checkAndNotConsume("TNOTK", false)||checkAndNotConsume("TIDNT",false)||
+                checkAndNotConsume("TTLIT",false)|| checkAndNotConsume("TFLIT",false)||
+                checkAndNotConsume("TTRUE",false)||checkAndNotConsume("TFALS",false)||
+                checkAndNotConsume("TLPAR",false)){
+
+                return elist();
+            }
+
         return null;
     }
 
@@ -550,7 +563,9 @@ public class Parser {
     }
 
     private TreeNode returnstattail() {
-        if (check("something", false)) {//TODO
+        if (checkAndNotConsume("TIDNT", false)||checkAndNotConsume("TILIT", false)||
+                checkAndNotConsume("TFLIT", false)||checkAndNotConsume("TTRUE", false)||
+                checkAndNotConsume("TFALS", false)||checkAndNotConsume("TLPAR", false)) {
             return expr();
         }
         return null;
@@ -572,30 +587,32 @@ public class Parser {
 
     private TreeNode var() {
         TreeNode node = new TreeNode(Node.NSIMV);
-        check("TIDNT", true); //TODO idnt stuff
-        node.setLeft(vararr());
-        return node;
+        if(check("TIDNT", false)){
+            //TODO idnt stuff
+        }
+        return vararr(node);
     }
 
-    private TreeNode vararr(TreeNode n) {
+    private TreeNode vararr(TreeNode varNode) {
         if (check("TLBRK", false)) {
-            TreeNode node = new TreeNode(Node.NAELT);
-            node.setLeft(expr());
+            varNode.setValue(Node.NAELT);
+            varNode.setLeft(expr());
             check("TRBRK", true);
-            node.setRight(vararrvar());
-            return node;
+            return vararrvar(varNode);
         }
-        return null;
+        return varNode;
     }
 
     private TreeNode vararrvar(TreeNode vararrNode) {
-        TreeNode node = new TreeNode(Node.NARRV);
-        if (check("TCOMA", false)) {
-            //todo some id shit, idk.
-            check("TIDNT",true);
-            return node;
+        if (check("TDOTT", false)) {
+            vararrNode.setValue(Node.NARRV);
+            if(check("TIDNT",true)){
+                TreeNode node = new TreeNode(Node.NSIMV);
+                //todo id stuff
+                vararrNode.setRight(node);
+            }
         }
-        return null;
+        return vararrNode;
     }
 
     private TreeNode elist() {
@@ -773,17 +790,11 @@ public class Parser {
     }
 
     private TreeNode idexptail(TreeNode idexp){
-        TreeNode node;
-        if(check("TLPAR",false)){
+        if(checkAndNotConsume("TLPAR",false)){
             return fncall(idexp);
         }else{
-            node = vararr();
-            if(node==null){
-
-            }
+            return vararr(idexp);
         }
-        return idexp;
-
     }
 
     private TreeNode fncall(TreeNode idexp) {
@@ -813,13 +824,18 @@ public class Parser {
 
     private TreeNode prlisttail() {
         if (check("TCOMA", false)) {
-            return null;
+            return prlist();
         }
-        return prlist();
+        return null;
 
     }
 
     private TreeNode printitem() {
-        return null;
+        if(check("TSTRG",false)){
+            TreeNode node = new TreeNode(Node.NSTRG);
+            //todo symbol shit
+            return node;
+        }
+        return expr();
     }
 }
