@@ -17,20 +17,20 @@ public class A3 {
     }
 
     public void run(){
-        tokens = scanner.run("TestCode/cdsrc99.txt");
+        tokens = scanner.run("TestCode/ptest2.txt");
         parser = new Parser(tokens);
         parser.run();
         System.out.println();
-//        printTree(parser.root, 0);
+        printTree(parser.root, 0);
         System.out.println();
-        printSpace(parser.root);
+        printSpec(parser.root);
     }
 
     public void printTree(TreeNode root, int indent){
         if(root!=null) {
             String space = "";
-            for (int i = 0; i < indent-1; i++) {
-                space+=i%3==0?"|":" ";
+            for (int i = 0; i < indent; i++) {
+                space+=i%4==0?"|":" ";
             }
             //space+="\\";
             System.out.println(space+root.getValue());
@@ -39,6 +39,32 @@ public class A3 {
             printTree(root.getRight(), indent+4);
         }
 
+    }
+
+    public void printSpec(TreeNode node){
+        ArrayList<String> tree = new ArrayList<>();
+        printRec(node,tree);
+        int col = 0;
+        String output = "";
+        for (String sNode : tree) {
+            if(col>=70){
+                output+="\n";
+                col = 0;
+            }
+            col+=sNode.length();
+            output+=sNode;
+        }
+        System.out.println(output);
+    }
+
+    private ArrayList<String> printRec(TreeNode node, ArrayList<String> tree){
+        if(node != null) {
+            tree.add(node.toString());
+            printRec(node.getLeft(),tree);
+            printRec(node.getMiddle(),tree);
+            printRec(node.getRight(),tree);
+        }
+        return tree;
     }
 
     public void printSpace(TreeNode node){

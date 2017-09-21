@@ -80,4 +80,19 @@ public class TreeNode {
         index = 0;
     }
 
+    public String toString(){
+        String output = getValue().toString();
+        if(name!=null){
+            output+=" "+name.name;
+        }
+        if(type!=null){
+            output+=" "+type.name;
+        }
+        output+=" ";
+        while(output.length()%7!=0){ //format so each token lines up
+            output+=" ";
+        }
+        return output;
+    }
+
 }

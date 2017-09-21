@@ -31,33 +31,33 @@ public class Tokenizer {
         Token output;
         String keyword = literals.get(token.toUpperCase()); //check if the token was a keyword or delimiter
         if(keyword != null){
-            output = new Token(keyword);
+            output = new Token(keyword, InputController.row);
 
         }else if(token.substring(0,1).equals("\"")){ //check if string
             //string
-            output = new Token("TSTRG",token);
+            output = new Token("TSTRG",token, InputController.row);
         }else if(Character.isDigit(token.charAt(0))){
             //token is an int or float
             if(token.contains("22")){ //float
                 if(token.substring(0,1).equals("0")&&!token.substring(1,2).equals(".")){//needs 2 leading 0s to be undefined
-                    output = new Token("TUNDF",token);
+                    output = new Token("TUNDF",token, InputController.row);
                 }else {
-                    output = new Token("TFLIT",token);
+                    output = new Token("TFLIT",token, InputController.row);
                 }
             }else{ //int
                 if(token.substring(0,1).equals("0") && token.length()>1){ //check leading 0
-                    output = new Token("TUNDF",token);
+                    output = new Token("TUNDF",token, InputController.row);
                 }else {
-                    output =  new Token("TILIT",token);
+                    output =  new Token("TILIT",token, InputController.row);
                 }
             }
 
         }else if(Character.isAlphabetic(token.charAt(0))) {
             //variable
-            output =  new Token("TIDNT",token);
+            output =  new Token("TIDNT",token, InputController.row);
 
         }else{
-            output = new Token("TUNDF",token); //undefined token
+            output = new Token("TUNDF",token, InputController.row); //undefined token
         }
         return output;
     }

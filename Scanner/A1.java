@@ -29,11 +29,10 @@ public class A1 {
             while (!scanner.eof()) { //loop until the file ends
                 out.print(scanner.getToken()); //get token and send it to the output controller
             }
-            out.print(new Token("TEOF")); //send out the EOD token
+            out.print(new Token("TEOF", InputController.row)); //send out the EOD token
         }catch (Exception e){
 
         }
         return tokens;
-
     }
 }

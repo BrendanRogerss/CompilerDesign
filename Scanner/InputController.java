@@ -13,7 +13,7 @@ import java.util.Arrays;
 public class InputController {
 
     private PushbackReader reader = null;
-    public int row = 0;
+    public static int row = 0;
 
     public InputController(String filename){
 
