@@ -1,7 +1,5 @@
 import java.util.ArrayList;
 
-import static com.sun.corba.se.impl.util.Utility.printStackTrace;
-
 /**
  * Created by Brendan on 9/9/17.
  *
@@ -36,7 +34,7 @@ public class Parser {
             return true;
         }
         if (throwError) {
-            //throw error
+            System.out.println("Error: Unexpected token. Wanted: " + tok + " got: " + tokens.get(0).tok);
         }
         return false;
     }
@@ -772,7 +770,6 @@ public class Parser {
     private TreeNode idexp() {
         TreeNode node = new TreeNode(Node.NUNDEF);
         if (checkAndNotConsume("TIDNT", false)) {
-            //todo id stuff, should be checkandnotconsume
             setLexem(node);
         }
         return idexptail(node);
@@ -819,9 +816,9 @@ public class Parser {
     }
 
     private TreeNode printitem() {
-        if (check("TSTRG", false)) {
+        if (checkAndNotConsume("TSTRG", false)) {
             TreeNode node = new TreeNode(Node.NSTRG);
-            //todo symbol shit
+            setLexem(node);
             return node;
         }
         return expr();
