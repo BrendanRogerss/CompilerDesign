@@ -1,3 +1,5 @@
+import com.sun.tools.doclets.internal.toolkit.util.DocFinder;
+
 public class OutputController {
 
     private int col = 0;
@@ -13,8 +15,9 @@ public class OutputController {
         if(t.value!=null){
             s+= " "+t.value;
         }
-        else if(s.contains("TUNDF")){//output an undefined token
-            System.out.println("\n"+s);
+        if(s.contains("TUNDF")){//output an undefined token
+            System.out.println("\nError on line: "+ InputController.row+". Undefined  Token");
+            System.out.println(s);
             col=0;
             return;
         }

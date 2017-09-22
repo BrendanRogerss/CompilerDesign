@@ -49,7 +49,7 @@ public class InputController {
     public String getLine() throws IOException {
         String line = "";
         String letter = get();
-        while(!letter.equals("\n")&&!letter.equals("\r")){
+        while(!letter.equals("\n")&&!letter.equals("\r")&&!eof()){
             line+=letter;
             letter=get();
         }

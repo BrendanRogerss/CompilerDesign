@@ -20,8 +20,8 @@ public class A3 {
         tokens = scanner.run("TestCode/ptest2.txt");
         parser = new Parser(tokens);
         parser.run();
-        System.out.println();
-        printTree(parser.root, 0);
+        //System.out.println();
+        //printTree(parser.root, 0);
         System.out.println();
         printSpec(parser.root);
     }

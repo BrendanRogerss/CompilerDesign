@@ -15,7 +15,7 @@ public class A1 {
     public static void main(String[] args) throws IOException {
         A1 run = new A1();
         //run.run(args[0]);
-        run.run("TestCode/cdsrc99.txt");
+        run.run("TestCode/cdsrc2.txt");
 
     }
 

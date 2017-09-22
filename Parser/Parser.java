@@ -27,8 +27,6 @@ public class Parser {
         }
         if (throwError) {
             System.out.println("Error: Unexpected token. Wanted: " + tok + " got: " + tokens.get(0).tok);
-            printStackTrace();
-            System.exit(1);
         }
         return false;
     }
@@ -41,11 +39,6 @@ public class Parser {
             //throw error
         }
         return false;
-    }
-
-    public void setStRec(TreeNode node) {
-        String v = tokens.get(0).value;
-        tokens.remove(0);
     }
 
     public void setLexem(TreeNode node){
@@ -389,20 +382,16 @@ public class Parser {
         if (checkAndNotConsume("TREPT", false)) {
             return repstat();
         } else if (checkAndNotConsume("TIDNT", false)) {
-            return idstat();
+            TreeNode node = new TreeNode(Node.NUNDEF);
+            if (checkAndNotConsume("TIDNT", false)) {
+                setLexem(node);
+            }
+            return idtail(node);
         } else if (checkAndNotConsume("TINKW", false) || checkAndNotConsume("TOUTP", false)) {
             return iostat();
         }
         checkAndNotConsume("TRETN", true);
         return returnstat();
-    }
-
-    private TreeNode idstat() {
-        TreeNode node = new TreeNode(Node.NUNDEF);
-        if (checkAndNotConsume("TIDNT", false)) {
-            setLexem(node);
-        }
-        return idtail(node);
     }
 
     private TreeNode idtail(TreeNode id) {
@@ -471,7 +460,6 @@ public class Parser {
     }
 
     private TreeNode elsestat() {
-        //todo ########################### might need to pass node through
         if (check("TELSE", false)) {
             return stats();
         }
@@ -501,7 +489,7 @@ public class Parser {
             check("TINPT", true);
             node.setLeft(vlist());
             return node;
-        } else if (check("TOUTP", false)) {//TODO: check true / flase
+        } else if (check("TOUTP", false)) {
             TreeNode node = new TreeNode(Node.NOUTP);
             check("TASGN", true);
             return iostatmid(node);

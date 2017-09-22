@@ -93,6 +93,8 @@ public class Scanner {
                             case "\n":
                             case "\r": //end of line while parsing string
                                 A1.out.printError("\nError on line: " + Integer.toString(r.row) + " Expected \" instead found end of line");
+
+
                                 return null;
                             default:
                                 buffer += character;

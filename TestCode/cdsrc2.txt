@@ -52,4 +52,12 @@ CD  ex2
 
 #$&&nextid
 
+"hrllo " asdasd
+"hell 12334
+/-*asdasd
+asdasd*-/
+
 end CD ex2
+
+/-*213345
+678789*-/
