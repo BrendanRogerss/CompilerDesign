@@ -25,6 +25,14 @@ public class Parser {
         }
         if (throwError) {
             System.out.println("Error: Unexpected token. Wanted: " + tok + " got: " + tokens.get(0).tok);
+            while (!tokens.isEmpty()){
+                if(tokens.get(0).tok.equals("TSEMI")){ //go to the end of the next statement
+                    tokens.remove(0);
+                    return false;//move onto the next statement
+                }
+                tokens.remove(0);
+            }
+            System.exit(1); //if no other statement exists, end parsing.
         }
         return false;
     }
@@ -135,7 +143,6 @@ public class Parser {
         check("TBEGN", true);
         node.setRight(stats());
         check("TENDK", true);
-        //TODO: something about an id
         check("TCD", true);
         check("TIDNT", true);
         return node;
@@ -350,7 +357,7 @@ public class Parser {
 
     private TreeNode stats() {
         TreeNode node = new TreeNode(Node.NSTATS);
-        if (checkAndNotConsume("TFORK", false) || checkAndNotConsume("TIFKW", false)) {//TODO
+        if (checkAndNotConsume("TFORK", false) || checkAndNotConsume("TIFKW", false)) {
             node.setLeft(strstat());
         } else {
             node.setLeft(stat());
@@ -381,9 +388,7 @@ public class Parser {
             return repstat();
         } else if (checkAndNotConsume("TIDNT", false)) {
             TreeNode node = new TreeNode(Node.NUNDEF);
-            if (checkAndNotConsume("TIDNT", false)) {
-                setLexem(node);
-            }
+            setLexem(node);
             return idtail(node);
         } else if (checkAndNotConsume("TINKW", false) || checkAndNotConsume("TOUTP", false)) {
             return iostat();
@@ -490,27 +495,18 @@ public class Parser {
         } else if (check("TOUTP", false)) {
             TreeNode node = new TreeNode(Node.NOUTP);
             check("TASGN", true);
-            return iostatmid(node);
+            if (check("TOUTL", false)) {
+                node.setValue(Node.NOUTL);
+            } else {
+                node.setMiddle(prlist());
+                if (check("TASGN", false) && check("TOUTL", false)) {
+                    node.setValue(Node.NOUTL);
+                }
+            }
+            return node;
         }
-        System.out.println("Error in istat??");
+        System.out.println("Error in iotat??");
         return null;
-    }
-
-    private TreeNode iostatmid(TreeNode outNode) {
-        if (check("TOUTL", false)) {
-            outNode.setValue(Node.NOUTL);
-        } else {
-            outNode.setMiddle(prlist());
-            outNode = iostatpr(outNode);
-        }
-        return outNode;
-    }
-
-    private TreeNode iostatpr(TreeNode outNode) {
-        if (check("TASGN", false) && check("TOUTL", false)) {
-            outNode.setValue(Node.NOUTL);
-        }
-        return outNode;
     }
 
     private TreeNode callstat(TreeNode callNode) {
@@ -742,7 +738,6 @@ public class Parser {
         if (checkAndNotConsume("TIDNT", false)) {
             return idexp();
         } else if (checkAndNotConsume("TILIT", false)) {
-            //todo symbol table shit
             TreeNode node = new TreeNode(Node.NILIT);
             setLexem(node);
             return node;
