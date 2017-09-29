@@ -10,26 +10,26 @@ public class OutputController {
         }
         A1.tokens.add(t);
 
-        String s = t.tok;
-        if(t.value!=null){
-            s+= " "+t.value;
-        }
-        if(s.contains("TUNDF")){//output an undefined token
-            System.out.print("\nError on line: "+ InputController.row+". Undefined  Token");
-            System.out.println("\n"+s+"\n");
-            col=0;
-            return;
-        }
-        s+=" ";
-        while(s.length()%6!=0){ //format so each token lines up
-            s+=" ";
-        }
-        if(col>60){ //move to the next column
-            System.out.println();
-            col=0;
-        }
-        col+=s.length();
-        System.out.print(s);
+//        String s = t.tok;
+//        if(t.value!=null){
+//            s+= " "+t.value;
+//        }
+//        if(s.contains("TUNDF")){//output an undefined token
+//            System.out.print("\nError on line: "+ InputController.row+". Undefined  Token");
+//            System.out.println("\n"+s+"\n");
+//            col=0;
+//            return;
+//        }
+//        s+=" ";
+//        while(s.length()%6!=0){ //format so each token lines up
+//            s+=" ";
+//        }
+//        if(col>60){ //move to the next column
+//            System.out.println();
+//            col=0;
+//        }
+//        col+=s.length();
+//        System.out.print(s);
 
     }
 
