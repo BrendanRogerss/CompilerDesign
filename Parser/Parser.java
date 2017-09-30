@@ -2,6 +2,8 @@ import java.util.ArrayList;
 
 /**
  * Created by Brendan on 9/9/17.
+ * Student Number: 3208972
+ * Main parser for the compiler
  *
  */
 public class Parser {
@@ -423,7 +425,7 @@ public class Parser {
             if (checkAndNotConsume("TLPAR", false)) {
                 return callstat(node);//making a function call
             }
-            return idasgnstat(vararr(node));//assigning call
+            return idasgnstat(arrayVar(node));//assigning call
         } else if (checkAndNotConsume("TINKW", false) || checkAndNotConsume("TOUTP", false)) { //check for ins and outs
             return iostat();
         } else if (checkAndNotConsume("TRETN", true)){//check for a return
@@ -494,16 +496,11 @@ public class Parser {
         if(!check("TRPAR", true)){return null;}
         node.setMiddle(stats()); //set the statements
         if(node.getMiddle()==null){return null;}
-        node.setRight(elsestat()); //set else if we need it
+        if (check("TELSE", false)) {
+            node.setRight(stats());
+        }
         if(!check("TENDK", true)){return null;}
         return node;
-    }
-
-    private TreeNode elsestat() {
-        if (check("TELSE", false)) {//check if we need else
-            return stats();
-        }
-        return null;
     }
 
     //assign statements
@@ -615,45 +612,42 @@ public class Parser {
         if (checkAndNotConsume("TIDNT", false)) {
             setLexeme(node);
         }
-        return vararr(node);
+        return arrayVar(node);//checks if its an array variable
     }
 
     //array variable
-    private TreeNode vararr(TreeNode varNode) {
+    private TreeNode arrayVar(TreeNode varNode) {
         if (check("TLBRK", false)) {
             varNode.setValue(Node.NAELT);
             varNode.setLeft(expr());
             if(varNode.getLeft()==null){return null;}
             if(!check("TRBRK", true)){return null;}
-            return vararrvar(varNode);
+            //return arrayVarStruct(varNode);
+            if (check("TDOTT", false)) {
+                varNode.setValue(Node.NARRV); //set value of the node
+                if (checkAndNotConsume("TIDNT", true)) { //get tidnt
+                    TreeNode node = new TreeNode(Node.NSIMV);//make a new node
+                    setLexeme(node);//put the idnt in it
+                    varNode.setRight(node);//put it to the right of the array node
+                    if(varNode.getRight()==null){return null;}//check if something went wrong
+                }
+            }
+            return varNode; //return array node
         }
         varNode.setValue(Node.NSIMV);
         return varNode;
     }
 
-    //array type struct
-    private TreeNode vararrvar(TreeNode vararrNode) {
-        if (check("TDOTT", false)) {
-            vararrNode.setValue(Node.NARRV);
-            if (checkAndNotConsume("TIDNT", true)) {
-                TreeNode node = new TreeNode(Node.NSIMV);
-                setLexeme(node);
-                vararrNode.setRight(node);
-                if(vararrNode.getRight()==null){return null;}
-            }
-        }
-        return vararrNode;
-    }
-
-    //
+    //arguments
     private TreeNode elist() {
         TreeNode node = new TreeNode(Node.NEXPL);
-        node.setLeft(bool());
+        node.setLeft(bool()); //set the argument in the node
         if(node.getLeft()==null){return null;}
-        node.setRight(elisttail());
+        node.setRight(elisttail()); //check if there are mode
         return node;
     }
 
+    //if we need more elist
     private TreeNode elisttail() {
         if (check("TCOMA", false)) {
             return elist();
@@ -661,46 +655,47 @@ public class Parser {
         return null;
     }
 
+    //boolean node
     private TreeNode bool() {
         return booltail(rel());
     }
 
     private TreeNode booltail(TreeNode relNode) {
         if (check("TANDK", false) || check("TORKW", false) || check("TXORK", false)) {
-            TreeNode node = logop(relNode);
-            if(node==null){return null;}
-            node.setRight(rel());
-            if(node.getRight()==null){return null;}
-            return booltail(node);
+            TreeNode node = logop(relNode); //node is a logop
+            if(node==null){return null;} //check if something went wrong
+            node.setRight(rel()); //get other side of expression
+            if(node.getRight()==null){return null;} //check if something went wrong
+            return booltail(node); //
         }
         return relNode;
     }
 
     private TreeNode rel() {
-        if (check("TNOTK", false)) {
-            TreeNode node = new TreeNode(Node.NNOT);
-            node.setMiddle(rel());
-            if(node.getMiddle()==null){return null;}
+        if (check("TNOTK", false)) { //if not
+            TreeNode node = new TreeNode(Node.NNOT); //make node
+            node.setMiddle(rel()); //set expression
+            if(node.getMiddle()==null){return null;} //see if something went wrong
             return node;
         }
-        return reltail(expr());
+        return reltail(expr()); //return the expression
     }
 
     private TreeNode reltail(TreeNode expr) {
         if (checkAndNotConsume("TDEQL", false) || checkAndNotConsume("TNEQL", false) || checkAndNotConsume("TGRTR", false) ||
                 checkAndNotConsume("TLEQL", false) || checkAndNotConsume("TLESS", false) ||
-                checkAndNotConsume("TGREQ", false)) {
-            TreeNode node = relop(expr);
-            if(node==null){return null;}
-            node.setRight(expr());
-            if(node.getRight()==null){return null;}
+                checkAndNotConsume("TGREQ", false)) { //check for part of expression
+            TreeNode node = relop(expr); //call relop
+            if(node==null){return null;} //see if something went wrong
+            node.setRight(expr()); //set the expression to the right
+            if(node.getRight()==null){return null;} //see if something went wrong
             return node;
         }
         return expr;
     }
 
     private TreeNode logop(TreeNode rel) {
-        TreeNode node = null;
+        TreeNode node = null; //get the token and set the node
         if (check("TANDK", false)) {
             node = new TreeNode(Node.NAND);
         } else if (check("TORKW", false)) {
@@ -709,13 +704,13 @@ public class Parser {
             node = new TreeNode(Node.NXOR);
         }
         if(node==null){return null;}
-        node.setLeft(rel);
+        node.setLeft(rel); //set the rel to the left of it
         if(node.getLeft()==null){return null;}
         return node;
     }
 
     private TreeNode relop(TreeNode expr) {
-        TreeNode node = null;
+        TreeNode node = null; //check the next token and set the node
         if (check("TDEQL", false)) {
             node = new TreeNode(Node.NEQL);
         } else if (check("TNEQL", false)) {
@@ -730,7 +725,7 @@ public class Parser {
             node = new TreeNode(Node.NGEQ);
         }
         if (node == null) {return null;}
-        node.setLeft(expr);
+        node.setLeft(expr); //set the expression after it
         if(node.getLeft()==null){return null;}
         return node;
     }
@@ -740,31 +735,32 @@ public class Parser {
     }
 
     private TreeNode exprtail(TreeNode term) {
-        if (check("TADDT", false)) {
-            TreeNode node = new TreeNode(Node.NADD);
-            node.setLeft(term);
-            if(node.getLeft()==null){return null;}
-            node.setRight(term());
-            if(node.getRight()==null){return null;}
-            return exprtail(node);
+        if (check("TADDT", false)) { //if its an +
+            TreeNode node = new TreeNode(Node.NADD); //make the node
+            node.setLeft(term);//set the first term to the left
+            if(node.getLeft()==null){return null;} //if something went wrong
+            node.setRight(term());//set the other side of the expression to the right
+            if(node.getRight()==null){return null;} //if something went wrong
+            return exprtail(node); //return the end of the expression
         } else if (check("TSUBT", false)) {
-            TreeNode node = new TreeNode(Node.NSUB);
-            node.setLeft(term);
+            TreeNode node = new TreeNode(Node.NSUB); //define the node
+            node.setLeft(term); //same as above
             if(node.getLeft()==null){return null;}
             node.setRight(term());
             if(node.getRight()==null){return null;}
             return exprtail(node);
         } else {
-            return term;
+            return term; //return node term node
         }
     }
 
     private TreeNode term() {
-        return termtail(fact());
+        return termtail(fact()); //return a term
     }
 
     private TreeNode termtail(TreeNode fact) {
 
+        //check the token, set the value of the node, set the left and right, return the tail of it
         if (check("TMULT", false)) {
             TreeNode node = new TreeNode(Node.NMUL);
             node.setLeft(fact);
@@ -790,102 +786,96 @@ public class Parser {
         return fact;
     }
 
+    //><fact>
     private TreeNode fact() {
         return facttail(exponent());
     }
 
+
     private TreeNode facttail(TreeNode exp) {
-        if (check("TCART", false)) {
-            TreeNode node = new TreeNode(Node.NPOW);
-            node.setLeft(exp);
+        if (check("TCART", false)) { //check for ^ or epsilon
+            TreeNode node = new TreeNode(Node.NPOW); //set node
+            node.setLeft(exp); //set left expression
             if(node.getLeft()==null){return null;}
-            node.setRight(exponent());
+            node.setRight(exponent()); //set right expression
             if(node.getRight()==null){return null;}
-            return facttail(node);
+            return facttail(node); //return facttail
         }
         return exp;
     }
 
     private TreeNode exponent() {
-        if (checkAndNotConsume("TIDNT", false)) {
-            return idexp();
-        } else if (checkAndNotConsume("TILIT", false)) {
+        if (checkAndNotConsume("TIDNT", false)) { //got an identifier
+            TreeNode node = new TreeNode(Node.NUNDEF); //make a node, dont know what it is yet
+            setLexeme(node); //set the lexeme in the node
+            if (checkAndNotConsume("TLPAR", false)) { //check (
+                return fncall(node); //we got a function
+            } else {
+                return arrayVar(node);//we dont
+            }
+        } else if (checkAndNotConsume("TILIT", false)) { //an integer
             TreeNode node = new TreeNode(Node.NILIT);
             setLexeme(node);
             return node;
-        }else if(checkAndNotConsume("TFLIT",false)){
+        }else if(checkAndNotConsume("TFLIT",false)){ //a float
             TreeNode node = new TreeNode(Node.NFLIT);
             setLexeme(node);
             return node;
-        } else if (check("TTRUE", false)) {
+        } else if (check("TTRUE", false)) { //true
             TreeNode node = new TreeNode(Node.NTRUE);
             return node;
-        } else if (check("TFALS", false)) {
+        } else if (check("TFALS", false)) { //false
             TreeNode node = new TreeNode(Node.NFALS);
             return node;
-        } else if (check("TLPAR", false)) {
-            TreeNode bool = bool();
-            check("TRPAR", true);
+        } else if (check("TLPAR", false)) { //(
+            TreeNode bool = bool(); //some expression
+            check("TRPAR", true);//)
             return bool;
         }
         return null;
     }
 
-    private TreeNode idexp() {
-        TreeNode node = new TreeNode(Node.NUNDEF);
-        if (checkAndNotConsume("TIDNT", false)) {
-            setLexeme(node);
-        }
-        return idexptail(node);
-    }
-
-    private TreeNode idexptail(TreeNode idexp) {
-        if (checkAndNotConsume("TLPAR", false)) {
-            return fncall(idexp);
-        } else {
-            return vararr(idexp);
-        }
-    }
-
+    //<fncall>
     private TreeNode fncall(TreeNode idexp) {
+        //function call
+        idexp.setValue(Node.NFCALL); //set node
+        if(!check("TLPAR", true)){return null;}//(
+        idexp.setMiddle(fncalllist()); //get arguments
+        if(!check("TRPAR", true)){return null;} //)
 
-        idexp.setValue(Node.NFCALL);
-        if(!check("TLPAR", true)){return null;}
-        idexp.setMiddle(fncalllist());
-        if(!check("TRPAR", true)){return null;}
-
-        return idexp;
+        return idexp;//return node
     }
 
     private TreeNode fncalllist() {
         if (checkAndNotConsume("TNOTK", false) || checkAndNotConsume("TIDNT", false) || checkAndNotConsume("TFLIT", false) || checkAndNotConsume("TILIT", false) ||
                 checkAndNotConsume("TTRUE", false) || checkAndNotConsume("TFALS", false) || checkAndNotConsume("TLPAR", false)) {
-            return elist();
+            return elist(); //gather all the arguments
         }
         return null;
     }
 
+    //<prlist>
     private TreeNode prlist() {
-        TreeNode node = new TreeNode(Node.NPRLST);
-        node.setLeft(printitem());
+        TreeNode node = new TreeNode(Node.NPRLST);//set node
+        node.setLeft(printitem());//set print item
         if(node.getLeft()==null){return null;}
-        node.setRight(prlisttail());
+        node.setRight(prlisttail());//if we need more
         return node;
     }
 
     private TreeNode prlisttail() {
-        if (check("TCOMA", false)) {
+        if (check("TCOMA", false)) {//check for more
             return prlist();
         }
         return null;
     }
 
     private TreeNode printitem() {
-        if (checkAndNotConsume("TSTRG", false)) {
-            TreeNode node = new TreeNode(Node.NSTRG);
-            setLexeme(node);
+        if (checkAndNotConsume("TSTRG", false)) { //check for a string
+            TreeNode node = new TreeNode(Node.NSTRG); //make a new node
+            setLexeme(node);//add it to the node
             return node;
         }
-        return expr();
+        return expr(); //if no string, return expression
     }
 }
