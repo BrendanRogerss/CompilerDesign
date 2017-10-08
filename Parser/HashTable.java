@@ -63,7 +63,7 @@ public class HashTable {
         StRec d = lookupSymbol(s);
         if (d != null) return null;
         int h = hash(s);
-        d = new StRec(s,v,ln);
+        //d = new StRec(s,v,ln);
         table[h] = new HashTableItem(s,d,table[h]);
         return d;
     }

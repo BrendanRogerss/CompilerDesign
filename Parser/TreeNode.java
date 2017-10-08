@@ -83,10 +83,10 @@ public class TreeNode {
     public String toString(){
         String output = getValue().toString();
         if(name!=null){
-            output+=" "+name.name;
+            output+=" "+name.getName();
         }
         if(type!=null){
-            output+=" "+type.name;
+            output+=" "+type.getName();
         }
         output+=" ";
         while(output.length()%7!=0){ //format so each token lines up

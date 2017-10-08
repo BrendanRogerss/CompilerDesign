@@ -13,8 +13,8 @@ public class A3 {
 
     public static void main(String[] args) {
         A3 a3 = new A3();
-        a3.run(args[0]);
-        //a3.run("TestCode/cdsrc99.txt");
+        //a3.run(args[0]);
+        a3.run("TestCode/ptest2.txt");
     }
 
     public void run(String filename){
