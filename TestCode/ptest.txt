@@ -6,5 +6,8 @@ main
   y : integer,
   z : boolean
 begin
+  repeat()
+  y<<1;
+  until true;
   Out << "Hello World";
 end CD ex1

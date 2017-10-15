@@ -12,12 +12,12 @@ arrays zz : YY
 func fib(i:integer) : integer
 	k:integer
 begin
-	zz[0].x << 1; /--begin to fill in the array
+	zz[0].x << 1;
 	zz[1].x << 1;
 	for(k<< 0; k<i)
-		zz[2].x << (zz[1].x + zz[0].x); /--calculate next number
-		zz[0].x = zz[1].x; /--shift to the left
-		zz[1].x == zz[2].x;
+		zz[2].x << (zz[1].x + zz[0].x);
+		zz[0].x << zz[1].x;
+		zz[1].x << zz[2].x;
 		k << k+1;
 	end
 	return zz[2]; 

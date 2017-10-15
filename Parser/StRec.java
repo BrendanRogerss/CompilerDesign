@@ -67,8 +67,8 @@ public class StRec {
     public static final StRec INTTYPE = new StRec("intg", false, VOIDTYPE);
     public static final StRec REALTYPE = new StRec("real",false, VOIDTYPE);
     public static final StRec BOOLTYPE = new StRec("bool", false, VOIDTYPE);
-    public static final StRec TRUE = new StRec("bool", true);
-    public static final StRec FALSE = new StRec("bool",false);
+//    public static final StRec TRUE = new StRec("bool", true);
+//    public static final StRec FALSE = new StRec("bool",false);
 
 
 }

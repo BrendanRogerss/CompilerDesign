@@ -39,6 +39,7 @@ public class Parser {
             return true;
         }
         if (throwError) {
+            Thread.dumpStack();
             System.out.println("Error on line "+tokens.get(0).line+": Unexpected token. Wanted: " + tok + " got: " + tokens.get(0).tok);
             statementRecovery();
         }
@@ -532,6 +533,7 @@ public class Parser {
             if(!check("TINPT", true)){return null;}
             node.setLeft(vlist()); //get list
             if(node.getLeft()==null) {return null;}
+            //check("TSEMI",true);
             return node;
         } else if (check("TOUTP", false)) { //check out
             TreeNode node = new TreeNode(Node.NOUTP);
@@ -593,7 +595,7 @@ public class Parser {
     private TreeNode vlist() {
         TreeNode node = new TreeNode(Node.NVLIST);
         node.setLeft(var());
-        if(node.getRight()==null){return null;}
+        if(node.getLeft()==null){return null;}
         node.setRight(vlisttail());
         return node;
     }
