@@ -9,4 +9,16 @@ begin
   x << 76 + 3 - ( 4 % 2 );
   y << 3.14159;
   z << true;
+
+  repeat(x << x + 1)
+    b << 72 % 4;
+  until z == true and x << y;
+
+    z << true;
+    if (y < 4)
+    Out << y << Line;
+    else
+    Out << "String Out" << Line;
+    end
+    In >> x;
 end CD ex2

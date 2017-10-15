@@ -1,74 +1,147 @@
-import java.util.HashMap;
-import java.util.HashSet;
-
-/**
- * Created by Brendan on 11/9/17.
- *
- * Symbol Table Record
- *
- */
+//
+// COMP3290/6290 CD Compiler
+//
+// Symbol Table Record class - Contains all information reqd about a name.
+//
+// M.Hannaford
+// 16-Jul-2005		as StRec for CD5
+//
+//	Modified:
+//		06-Jun-2006	as StRec for CD6
+//		10-Aug-2014	as StRec for CD14
+//		01-Aug-2015	as StRec for CD15
+//		23-Jul-2016	as StRec for CD16
+//		20-Aug-2016	CD16 Semantics: Added attributes isDecl, typeName, declPlace (for funcs)
+//		03-Sep-2016	added an id classifier: attribute idType
+//
+// P. Mahata
+// Modified:
+// 		26-May-2017 altered to CD compiler
+//
 public class StRec {
 
-    private String name; //name of id (lexeme for hash table lookup)
-    private String type; //token type ie TIDNT
-    private String idType; //how is this variable name originally declared
-    private int value; //for integer constant
-    private double fvalue; //for floating point constant
-    private int dLine; //line declared
-    private boolean decl; //set when declared
-    private StRec typeName; //link between this identifier/literal and its type
-    private TreeNode declPlace; //where the decl syntax sub-tree is for a func - for param checks
-    //private HashTable hashTable = new HashTable(); //complete has table for a list of fields in a particlar struct
-    private HashMap<String, StRec> hashTable;
-    private int base; //base register number
-    private int offset; //allocated offset
+	private String type;		// Token type giving rise to this StRecord
+	private String name;		// name of id (lexeme for hash table lookup)
+	private IdClass idType;		// How is this variable name originally declared?
+	private int value;		// for an Integer Constant
+	private double fvalue;		// for a floating point constant
+	private int dline;		// line where declared
+	private	boolean decl;		// set when declared
+	private StRec typeName;		// link between this identifier/literal and it's type
+
+	private	TreeNode declPlace;	// where the decl syntax sub-tree is for a func - for param type checks
+
+	private HashTable hashTable;	// Complete hash table for a list of fields in a particular struct
+					// Only needed if we wish to allow field names to be re-used in structs
+
+	private int base;	// base register number		// added for code generator
+	private int offset;	// allocated offset		// added for code generator
+
+	public StRec(String s) {
+		this(s,0,-1);
+	}
+
+	public StRec(String s, boolean self, StRec other) {	// Special constructor for global simple types
+		this(s,0,-1);
+		decl = true;
+		if (self) typeName = this; else typeName = other;
+	}
+
+	public StRec(String s, int ln) {
+		this(s,0,ln);
+	}
+
+	public StRec(String s, int v, int ln) {
+		type = "TIDNT";
+		name = s.substring(0);
+		idType = IdClass.IUNDEF;
+		if (Character.isDigit(name.charAt(0))) type = "TILIT";
+		if (name.charAt(0) == '"')   type = "TSTRG";
+		value = v;
+		fvalue = 0.0;
+		dline = ln;
+		decl = false;
+		typeName = VOIDTYPE;	// Do we also use this for struct id within array type decl?
+		declPlace = null;
+		hashTable = null;
+
+		base = -1;	// indicates yet to be decided
+		offset = -1;	// indicates yet to be allocated
+	}
+
+	public StRec(String s, double v, int ln) {
+		type = "TFLIT";
+		name = s.substring(0);
+		value = 0;
+		fvalue = v;
+		dline = ln;
+
+		base = -1;	// indicates yet to be decided
+		offset = -1;	// indicates yet to be allocated
+	}
+
+	public StRec(String s, boolean bl) {	// Special constructor for global simple types
+		this(s,0,-1);
+		decl = true;
+		typeName = BOOLTYPE;
+		if (bl) value = 1;
+	}
 
 
-    public StRec(String s){
-        this(s,0,-1);
-    }
 
-    public StRec(String s, int ln){
-        this(s,0,ln);
-    }
+	public boolean isDecl() { return decl; }
 
-    public StRec(String s, boolean self, StRec other){
-        //special constructor for global simple types
-        this(s,0,-1);
-        decl = true;
-        if (self) typeName = this; else typeName = other;
-    }
+	public StRec getTypeName() { return typeName; }
 
-    public StRec(String s, int v, int ln){
-        type = "TIDNT";
-        name = s;
-        idType = "NUNDEF";
-        if(Character.isDigit(name.charAt(0))) type = "TILIT";
-        if(name.charAt(0)=='"') type = "TSTRG";
-        value = v;
-        fvalue = 0.0;
-        dLine = ln;
-        decl = false;
-        typeName = VOIDTYPE; // do we also use this for struct id within array type decl
-        declPlace = null;
-        hashTable = null;
+	public void declare(StRec ty, IdClass cl) { decl = true; typeName = ty; idType = cl; }
 
-        base = -1;
-        offset = -1;
-    }
+	public void declareIntConst(StRec ty, IdClass cl, int val) { decl = true; typeName = ty; idType = cl; value = val;}
 
-    public String getName(){
-        return name;
-    }
+	public void declareRealConst(StRec ty, IdClass cl, double val) { decl = true; typeName = ty; idType = cl; fvalue = val;}
 
-    //Global static StRec's for type checking simple types and boolean values
+	public IdClass getIdType() { return idType; }
 
-    public static final StRec VOIDTYPE = new StRec("void",true,null);
-    public static final StRec INTTYPE = new StRec("intg", false, VOIDTYPE);
-    public static final StRec REALTYPE = new StRec("real",false, VOIDTYPE);
-    public static final StRec BOOLTYPE = new StRec("bool", false, VOIDTYPE);
-//    public static final StRec TRUE = new StRec("bool", true);
-//    public static final StRec FALSE = new StRec("bool",false);
+	public void setIdType (IdClass cl) { idType = cl; }
 
+	public TreeNode getDeclPlace() { return declPlace; }
+
+	public void setDeclPlace(TreeNode tr) { declPlace = tr; }
+
+	public HashTable getHashTable() { return hashTable; }	// A separate symbol table for each struct.
+								// Keep the complete hash table to re-establish context
+	public void setHashTable(HashTable st) { hashTable = st; }	//   since struct fields can be referenced anywhere.
+								// Established at struct decl time, looked up as reqd.
+	public String getName() { return name; }
+
+	public int getBase() { return base; }
+
+	public int getOffset() { return offset; }
+
+	public int getIntValue() { return value; }
+
+	public double getFloatValue() { return fvalue; }
+
+	public void allocate(int br, int os) {
+		base = br;
+		offset = os;
+	}
+
+	public String toString() {
+		if (type != "TFLIT")
+			return name + " " +  value + " " + dline;	// + " " + base + " " + offset;	// for code generator
+		else
+			return name + " " + fvalue + " " + dline;	// + " " + base + " " + offset;	// for code generator
+	}
+
+		//  Global static StRec's for type checking simple types and boolean values
+		//  ------------------------------------------------------------------------
+
+	public static final StRec VOIDTYPE = new StRec("void", true,  null);	  // All simple types point at these records
+	public static final StRec INTTYPE  = new StRec("intg", false, VOIDTYPE);  //  They are set up to try to stop null
+	public static final StRec REALTYPE = new StRec("real", false, VOIDTYPE);  //  reference errors after a semantic error
+	public static final StRec BOOLTYPE = new StRec("bool", false, VOIDTYPE);  //  has been found.
+
+	public static final StRec TRUE = new StRec("bool", true);	  // All simple types point at these records
+	public static final StRec FALSE  = new StRec("bool", false);  //  They are set up to try to stop null
 
 }
