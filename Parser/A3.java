@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 
 /**
@@ -20,9 +23,10 @@ public class A3 {
     public void run(String filename){
         tokens = scanner.run(filename); //get a list of all the tokens
         parser = new Parser(tokens); //init the parser
+        System.out.println(listing(filename));
         parser.run(); //run the parser, building the tree
         //System.out.println();
-        printTree(parser.root, 0);
+        //printTree(parser.root, 0);
         System.out.println(); //space
         printSpec(parser.root); //print the tree
     }
@@ -77,6 +81,23 @@ public class A3 {
             printTree(root.getRight(), indent+4);
         }
 
+    }
+
+    public String listing(String filename){
+        String output = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(new File(filename)))) {
+            String line;
+            int i = 1;
+            while ((line = br.readLine()) != null) {
+                // process the line.
+                output+=i+") "+line+"\n";
+                i++;
+            }
+        }catch (Exception e){
+
+        }
+
+        return output;
     }
 
 }
