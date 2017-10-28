@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Brendan on 9/9/17.
@@ -10,6 +11,8 @@ public class Parser {
 
     private ArrayList<Token> tokens; //tokens scanned in from the parser
     TreeNode root; //link to the root node
+    private HashMap<String, StRec> globalSymbolTable = new HashMap<>();
+    private HashMap<String, StRec> currentSymbolTable = globalSymbolTable;
 
     public Parser(ArrayList<Token> t) {
         tokens = t;
@@ -39,7 +42,7 @@ public class Parser {
             return true;
         }
         if (throwError) {
-            Thread.dumpStack();
+            //Thread.dumpStack();
             System.out.println("Error on line "+tokens.get(0).line+": Unexpected token. Wanted: " + tok + " got: " + tokens.get(0).tok);
             statementRecovery();
         }
@@ -60,11 +63,25 @@ public class Parser {
         System.exit(1); //if no other statement exists, end parsing.
     }
 
-    private void setLexeme(TreeNode node){ //adds a lexeme to the node
-        node.setName(new StRec(tokens.get(0).value,tokens.get(0).line));
+    private void setLexeme(TreeNode node, boolean declared){ //adds a lexeme to the node
+        StRec newRecord;
+        if(!declared){ //add to symbol table
+            //check if name already exists
+            if(currentSymbolTable.get(tokens.get(0).value)!=null){
+                System.out.println("Error on line "+tokens.get(0).line+": '"+tokens.get(0).value+"' has already been declared in this scope");
+            }
+            newRecord = new StRec(tokens.get(0).value,tokens.get(0).line);
+            currentSymbolTable.put(tokens.get(0).value, newRecord);
+        }else{
+            if(currentSymbolTable.get(tokens.get(0).value)==null){
+                System.out.println("Error on line "+tokens.get(0).line+": '"+tokens.get(0).value+"' has not been declared");
+            }
+        }
+        node.setName(currentSymbolTable.get(tokens.get(0).value));
         tokens.remove(0);
     }
 
+    //todo check where set type is ued and where it needs to be used (type, sdecl?, arrdecl, param)
     private void setType(TreeNode node){ //adds the next token as a type in the node
         node.setType(new StRec(tokens.get(0).value,tokens.get(0).line));
         tokens.remove(0);
@@ -123,9 +140,10 @@ public class Parser {
     private TreeNode init() {
         TreeNode node = new TreeNode(Node.NINIT);
         checkAndNotConsume("TIDNT", true);
-        setLexeme(node);
+        setLexeme(node, false);
         check("TISKW", true);
         node.setLeft(expr());
+        //todo: get type of expr() and put it in the StRec
         return node;
     }
 
@@ -200,11 +218,11 @@ public class Parser {
         return null;
     }
 
-    //used in declaring types
+    //used in declaring types (structs)
     private TreeNode type() {
         TreeNode node = new TreeNode(Node.NATYPE); //make the node
         checkAndNotConsume("TIDNT", true); //get the identifier
-        setLexeme(node); //set it in the node
+        setLexeme(node, false); //set it in the node
         check("TISKW", true); //check IS keyword
 
         if (check("TARRY", false)) { //if were setting arrays
@@ -216,7 +234,10 @@ public class Parser {
             setType(node); //add type into the node
         } else { //if were not setting arrays
             node.setValue(Node.NRTYPE); //change node name
+            currentSymbolTable = new HashMap<>();
             node.setLeft(fields()); //set the types in the struct
+            node.getName().setHashTable(currentSymbolTable);
+            currentSymbolTable = globalSymbolTable;
             check("TENDK", true); //end setting the types
         }
         return node;
@@ -241,7 +262,7 @@ public class Parser {
     private TreeNode sdecl() {
         TreeNode node = new TreeNode(Node.NSDECL); //set the node
         checkAndNotConsume("TIDNT", true); //grab the identifier
-        setLexeme(node);
+        setLexeme(node,false);
         check("TCOLN", true); //check :
         if (checkAndNotConsume("TIDNT", false)) { //if there is another identifier
             node.setValue(Node.NARRD); //change value of node
@@ -271,7 +292,7 @@ public class Parser {
     private TreeNode arrdecl() {
         TreeNode node = new TreeNode(Node.NARRD);//make the node
         checkAndNotConsume("TIDNT", true); //check for an identifier
-        setLexeme(node); //put it in the node
+        setLexeme(node,false); //put it in the node
         check("TCOLN", true); //check :
         checkAndNotConsume("TIDNT", true); //check another identifier
         setType(node);//set the type
@@ -283,7 +304,8 @@ public class Parser {
         TreeNode node = new TreeNode(Node.NFUND); //make the node
         check("TFUNC", true); //check key word
         checkAndNotConsume("TIDNT", true); //get name of function
-        setLexeme(node);
+        setLexeme(node,false);
+        currentSymbolTable = new HashMap<>();
         check("TLPAR", true); //more checks
         node.setLeft(plist()); //input the parameters
         check("TRPAR", true);//more checks
@@ -293,6 +315,8 @@ public class Parser {
         check("TBEGN", true); //check begin
         node.setRight(stats()); //go over the statements
         check("TENDK", true); //end
+        node.getName().setHashTable(currentSymbolTable);
+        currentSymbolTable = globalSymbolTable;
         return node;//return the function
     }
 
@@ -335,7 +359,7 @@ public class Parser {
 
         checkAndNotConsume("TIDNT", true);//check for an idnt
         TreeNode node = new TreeNode(Node.NUNDEF); //make a node, not sure what type it is
-        setLexeme(node);//put idnt into node
+        setLexeme(node,false);//put idnt into node
         check("TCOLN", true); //check :
         if (checkAndNotConsume("TIDNT", false)) { //check idnt
             node.setValue(Node.NARRP); //set value now we know
@@ -422,7 +446,7 @@ public class Parser {
             return repstat();
         } else if (checkAndNotConsume("TIDNT", false)) {//check for an idnt
             TreeNode node = new TreeNode(Node.NUNDEF);//make a node
-            setLexeme(node);//put the idnt in it
+            setLexeme(node,true);//put the idnt in it
             if (checkAndNotConsume("TLPAR", false)) {
                 return callstat(node);//making a function call
             }
@@ -612,7 +636,7 @@ public class Parser {
     private TreeNode var() {
         TreeNode node = new TreeNode(Node.NSIMV);
         if (checkAndNotConsume("TIDNT", false)) {
-            setLexeme(node);
+            setLexeme(node,true);
         }
         return arrayVar(node);//checks if its an array variable
     }
@@ -629,7 +653,8 @@ public class Parser {
                 varNode.setValue(Node.NARRV); //set value of the node
                 if (checkAndNotConsume("TIDNT", true)) { //get tidnt
                     TreeNode node = new TreeNode(Node.NSIMV);//make a new node
-                    setLexeme(node);//put the idnt in it
+                    //todo this lexeme is in the struct which is in the hashmap of the type
+                    setLexeme(node,true);//put the idnt in it
                     varNode.setRight(node);//put it to the right of the array node
                     if(varNode.getRight()==null){return null;}//check if something went wrong
                 }
@@ -809,7 +834,7 @@ public class Parser {
     private TreeNode exponent() {
         if (checkAndNotConsume("TIDNT", false)) { //got an identifier
             TreeNode node = new TreeNode(Node.NUNDEF); //make a node, dont know what it is yet
-            setLexeme(node); //set the lexeme in the node
+            setLexeme(node,true); //set the lexeme in the node
             if (checkAndNotConsume("TLPAR", false)) { //check (
                 return fncall(node); //we got a function
             } else {
@@ -817,11 +842,15 @@ public class Parser {
             }
         } else if (checkAndNotConsume("TILIT", false)) { //an integer
             TreeNode node = new TreeNode(Node.NILIT);
-            setLexeme(node);
+            //setLexeme(node,true); //set the lexeme in the node
+            //todo need to change this
+            node.setName(new StRec(tokens.get(0).value,tokens.get(0).line));
+            tokens.remove(0);
             return node;
         }else if(checkAndNotConsume("TFLIT",false)){ //a float
             TreeNode node = new TreeNode(Node.NFLIT);
-            setLexeme(node);
+            node.setName(new StRec(tokens.get(0).value,tokens.get(0).line));
+            tokens.remove(0);
             return node;
         } else if (check("TTRUE", false)) { //true
             TreeNode node = new TreeNode(Node.NTRUE);
@@ -875,7 +904,7 @@ public class Parser {
     private TreeNode printitem() {
         if (checkAndNotConsume("TSTRG", false)) { //check for a string
             TreeNode node = new TreeNode(Node.NSTRG); //make a new node
-            setLexeme(node);//add it to the node
+            setLexeme(node,false);//add it to the node
             return node;
         }
         return expr(); //if no string, return expression

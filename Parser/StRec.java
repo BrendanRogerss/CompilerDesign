@@ -18,6 +18,9 @@
 // Modified:
 // 		26-May-2017 altered to CD compiler
 //
+
+import java.util.HashMap;
+
 public class StRec {
 
 	private String type;		// Token type giving rise to this StRecord
@@ -31,7 +34,7 @@ public class StRec {
 
 	private	TreeNode declPlace;	// where the decl syntax sub-tree is for a func - for param type checks
 
-	private HashTable hashTable;	// Complete hash table for a list of fields in a particular struct
+	private HashMap<String, StRec> hashTable;	// Complete hash table for a list of fields in a particular struct
 					// Only needed if we wish to allow field names to be re-used in structs
 
 	private int base;	// base register number		// added for code generator
@@ -107,9 +110,9 @@ public class StRec {
 
 	public void setDeclPlace(TreeNode tr) { declPlace = tr; }
 
-	public HashTable getHashTable() { return hashTable; }	// A separate symbol table for each struct.
+	public HashMap<String, StRec> getHashTable() { return hashTable; }	// A separate symbol table for each struct.
 								// Keep the complete hash table to re-establish context
-	public void setHashTable(HashTable st) { hashTable = st; }	//   since struct fields can be referenced anywhere.
+	public void setHashTable(HashMap<String, StRec> st) { hashTable = st; }	//   since struct fields can be referenced anywhere.
 								// Established at struct decl time, looked up as reqd.
 	public String getName() { return name; }
 

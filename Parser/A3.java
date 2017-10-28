@@ -8,7 +8,6 @@ import java.util.ArrayList;
  */
 public class A3 {
 
-
     private A1 scanner = new A1(); //scanner to get tokens from the file
     private ArrayList<Token> tokens; //tokens from the file
     private Parser parser; //the parser class
