@@ -25,7 +25,7 @@ begin
 	return;
 end
 
-func Zeroes(zz:YY) : void
+func Zeroes(zz:YY, a:integer, b:integer) : void
 	i:integer, j:integer, k:integer
 begin
 	for (i << 0; i<limit)
@@ -59,11 +59,11 @@ begin
 end
 
 main
-	i:integer	/-- unused, required by syntax
+	i:integer, a:integer, b:integer	/-- unused, required by syntax
 begin
 	Ones(ZZ);
 
-	Zeroes(ZZ);
+	Zeroes(ZZ, a, b);
 
 	Out << "  ", 2;
 

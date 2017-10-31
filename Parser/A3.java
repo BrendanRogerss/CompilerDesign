@@ -16,16 +16,16 @@ public class A3 {
     public static void main(String[] args) {
         A3 a3 = new A3();
         //a3.run(args[0]);
-        a3.run("TestCode/ptest2.txt");
+        a3.run("TestCode/cdsrc99.txt");
     }
 
     public void run(String filename){
         tokens = scanner.run(filename); //get a list of all the tokens
         parser = new Parser(tokens); //init the parser
-        System.out.println(listing(filename));
+        //System.out.println(listing(filename));
         parser.run(); //run the parser, building the tree
-        //System.out.println();
-        //printTree(parser.root, 0);
+        System.out.println();
+        printTree(parser.root, 0);
         System.out.println(); //space
         printSpec(parser.root); //print the tree
     }

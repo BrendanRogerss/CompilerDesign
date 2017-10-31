@@ -5,7 +5,6 @@ import java.util.HashMap;
  * Created by Brendan on 9/9/17.
  * Student Number: 3208972
  * Main parser for the compiler
- *
  */
 public class Parser {
 
@@ -20,6 +19,16 @@ public class Parser {
 
     public void run() {
         root = program();
+
+//        for(HashMap.Entry e : globalSymbolTable.entrySet()){
+//            System.out.println(e.getKey()+ " " +((StRec)e.getValue()).getTypeName().getName());
+//            if(((StRec)e.getValue()).getHashTable()!=null){
+//                for(HashMap.Entry i : ((StRec)e.getValue()).getHashTable().entrySet()){
+//                    System.out.println("  "+i.getKey()+ " " +((StRec)i.getValue()).getTypeName().getName());
+//                }
+//            }
+//        }
+
     }
 
     //checks if the passed the next token is the wanted token
@@ -29,7 +38,7 @@ public class Parser {
             return true;
         }
         if (throwError) { //if we need to throw an error
-            System.out.println("Error on line "+tokens.get(0).line+": Unexpected token. Wanted: " + tok + " got: " +
+            System.out.println("Error on line " + tokens.get(0).line + ": Unexpected token. Wanted: " + tok + " got: " +
                     tokens.get(0).tok); //print the error message
             statementRecovery(); //try to recover
         }
@@ -43,18 +52,18 @@ public class Parser {
         }
         if (throwError) {
             //Thread.dumpStack();
-            System.out.println("Error on line "+tokens.get(0).line+": Unexpected token. Wanted: " + tok + " got: " + tokens.get(0).tok);
+            System.out.println("Error on line " + tokens.get(0).line + ": Unexpected token. Wanted: " + tok + " got: " + tokens.get(0).tok);
             statementRecovery();
         }
         return false;
     }
 
     //tries to find the next statement in the program
-    private void statementRecovery(){
+    private void statementRecovery() {
         //Thread.dumpStack();
         //System.exit(0);
-        while (!tokens.isEmpty()){
-            if(tokens.get(0).tok.equals("TSEMI")){ //go to the end of the next statement
+        while (!tokens.isEmpty()) {
+            if (tokens.get(0).tok.equals("TSEMI")) { //go to the end of the next statement
                 tokens.remove(0);
                 return;//move onto the next statement
             }
@@ -63,33 +72,77 @@ public class Parser {
         System.exit(1); //if no other statement exists, end parsing.
     }
 
-    private void setLexeme(TreeNode node, boolean declared){ //adds a lexeme to the node
+    private void setLexeme(TreeNode node, boolean declared) { //adds a lexeme to the node
         StRec newRecord;
-        if(!declared){ //add to symbol table
+        if (!declared) { //add to symbol table
             //check if name already exists
-            if(currentSymbolTable.get(tokens.get(0).value)!=null){
-                System.out.println("Error on line "+tokens.get(0).line+": '"+tokens.get(0).value+"' has already been declared in this scope");
+            if (currentSymbolTable.get(tokens.get(0).value) != null) {
+                System.out.println("Error on line " + tokens.get(0).line + ": '" + tokens.get(0).value + "' has already been declared in this scope");
             }
-            newRecord = new StRec(tokens.get(0).value,tokens.get(0).line);
+            newRecord = new StRec(tokens.get(0).value, tokens.get(0).line);
             currentSymbolTable.put(tokens.get(0).value, newRecord);
-        }else{
-            if(currentSymbolTable.get(tokens.get(0).value)==null){
-                System.out.println("Error on line "+tokens.get(0).line+": '"+tokens.get(0).value+"' has not been declared");
+        } else {
+            if (currentSymbolTable.get(tokens.get(0).value) == null && globalSymbolTable.get(tokens.get(0).value)==null) {
+                System.out.println("Error on line " + tokens.get(0).line + ": '" + tokens.get(0).value + "' has not been declared");
             }
         }
-        node.setName(currentSymbolTable.get(tokens.get(0).value));
+
+        if(currentSymbolTable.get(tokens.get(0).value)!=null){
+            node.setName(currentSymbolTable.get(tokens.get(0).value));
+        }else if (globalSymbolTable.get(tokens.get(0).value)!=null){
+            node.setName(globalSymbolTable.get(tokens.get(0).value));
+        }else{
+            //System.out.println("not found");
+            node.setName(new StRec(tokens.get(0).value));
+        }
         tokens.remove(0);
     }
 
     //todo check where set type is ued and where it needs to be used (type, sdecl?, arrdecl, param)
-    private void setType(TreeNode node){ //adds the next token as a type in the node
-        node.setType(new StRec(tokens.get(0).value,tokens.get(0).line));
+    private void setType(TreeNode node) { //adds the next token as a type in the node
+        StRec customType = globalSymbolTable.get(tokens.get(0).value);
+        if(customType == null){
+            System.out.println(tokens.get(0).value+" not in symboltable");
+        }
+        node.setType(customType);
+        node.getName().setTypeName(customType);
         tokens.remove(0);
     }
 
-    private void setType(TreeNode node, String type){ //adds the string passed in as the type in the node
-        node.setType(new StRec(type,tokens.get(0).line));
+    private void setType(TreeNode node, String type) { //adds the string passed in as the type in the node
+        node.getName().setTypeName(type);
+        node.setType(new StRec(type, tokens.get(0).line));
         //tokens.remove(0);
+    }
+
+    public void checkParamaters(TreeNode callNode){
+        //narrp = array    //nsimp = everything else
+        TreeNode nplist = globalSymbolTable.get(callNode.getName().getName()).getDeclPlace().getLeft();
+        ArrayList<TreeNode> arguments = new ArrayList<>();
+        while(nplist.getRight()!=null){
+            arguments.add(nplist.getLeft());
+            nplist=nplist.getRight();
+        }
+        arguments.add(nplist.getLeft());
+
+        ArrayList<TreeNode> parameters = new ArrayList<>();
+        nplist = callNode.getLeft();
+        while(nplist.getRight()!=null){
+            parameters.add(nplist.getLeft());
+            nplist=nplist.getRight();
+        }
+        parameters.add(nplist.getLeft());
+
+        if(parameters.size()!=arguments.size()){
+            System.out.println("number of paramters do not match arguments");
+        }else{
+            for (int i = 0; i < parameters.size(); i++) {
+                if(parameters.get(i).getName().getTypeName() != arguments.get(i).getName().getTypeName()){
+                    System.out.println("parameter types to not match");
+                }
+            }
+        }
+
     }
 
     //the start of the parser tree
@@ -157,7 +210,7 @@ public class Parser {
 
     //deals with the arrays declarations
     private TreeNode arrays() {
-        if(check("TARRS", false)){
+        if (check("TARRS", false)) {
             return arrdecls(); //return some declarations
         }
         return null;
@@ -183,7 +236,7 @@ public class Parser {
         node.setRight(stats()); //parse the statements
         check("TENDK", true); //check for "END"
         check("TCD", true);//etc..
-        check("TIDNT", true);
+        check("TIDNT", true);//todo semantics
         return node;
 
     }
@@ -262,7 +315,7 @@ public class Parser {
     private TreeNode sdecl() {
         TreeNode node = new TreeNode(Node.NSDECL); //set the node
         checkAndNotConsume("TIDNT", true); //grab the identifier
-        setLexeme(node,false);
+        setLexeme(node, false);
         check("TCOLN", true); //check :
         if (checkAndNotConsume("TIDNT", false)) { //if there is another identifier
             node.setValue(Node.NARRD); //change value of node
@@ -292,7 +345,7 @@ public class Parser {
     private TreeNode arrdecl() {
         TreeNode node = new TreeNode(Node.NARRD);//make the node
         checkAndNotConsume("TIDNT", true); //check for an identifier
-        setLexeme(node,false); //put it in the node
+        setLexeme(node, false); //put it in the node
         check("TCOLN", true); //check :
         checkAndNotConsume("TIDNT", true); //check another identifier
         setType(node);//set the type
@@ -304,13 +357,14 @@ public class Parser {
         TreeNode node = new TreeNode(Node.NFUND); //make the node
         check("TFUNC", true); //check key word
         checkAndNotConsume("TIDNT", true); //get name of function
-        setLexeme(node,false);
+        setLexeme(node, false);
+        node.getName().setDeclPlace(node);
         currentSymbolTable = new HashMap<>();
         check("TLPAR", true); //more checks
         node.setLeft(plist()); //input the parameters
         check("TRPAR", true);//more checks
         check("TCOLN", true);
-        setType(node,rtype()); //set the type
+        setType(node, rtype()); //set the type
         node.setMiddle(locals()); //set the local variables
         check("TBEGN", true); //check begin
         node.setRight(stats()); //go over the statements
@@ -359,7 +413,7 @@ public class Parser {
 
         checkAndNotConsume("TIDNT", true);//check for an idnt
         TreeNode node = new TreeNode(Node.NUNDEF); //make a node, not sure what type it is
-        setLexeme(node,false);//put idnt into node
+        setLexeme(node, false);//put idnt into node
         check("TCOLN", true); //check :
         if (checkAndNotConsume("TIDNT", false)) { //check idnt
             node.setValue(Node.NARRP); //set value now we know
@@ -367,7 +421,7 @@ public class Parser {
             return node; //return out
         }
         node.setValue(Node.NSIMP); //set node type if there isnt another idnt
-        setType(node,stype()); //set the type
+        setType(node, stype()); //set the type
         return node;
     }
 
@@ -395,11 +449,11 @@ public class Parser {
     }
 
     private String stype() { //return the type name
-        if(check("TINTG",false)){
+        if (check("TINTG", false)) {
             return "integer";
-        }else if(check("TREAL",false)){
+        } else if (check("TREAL", false)) {
             return "real";
-        }else if(check("TBOOL",false)){
+        } else if (check("TBOOL", false)) {
             return "boolean";
         }
         return null;
@@ -409,21 +463,21 @@ public class Parser {
     //this is where the error recovery starts
     private TreeNode stats() {
         TreeNode node = new TreeNode(Node.NSTATS);//make a node
-        if(checkAndNotConsume("TFORK", false)) {//check for
+        if (checkAndNotConsume("TFORK", false)) {//check for
             node.setLeft(forstat()); //set a for statement
             if (node.getLeft() == null) { //check if something went wrong
                 return statstail(); //try again
             }
-        }else if(checkAndNotConsume("TIFKW", false)){//check for if
+        } else if (checkAndNotConsume("TIFKW", false)) {//check for if
             node.setLeft(ifstat()); //launch into if statements
             if (node.getLeft() == null) {//check if something went wrong
                 return statstail();//try again
             }
         } else {
             node.setLeft(stat());//go into a statement
-            if(node.getLeft()!=null){//check if everything went ok
+            if (node.getLeft() != null) {//check if everything went ok
                 check("TSEMI", true);//consume the ;
-            }else{
+            } else {
                 return statstail();//if something went wrong, try again
             }
         }
@@ -446,14 +500,14 @@ public class Parser {
             return repstat();
         } else if (checkAndNotConsume("TIDNT", false)) {//check for an idnt
             TreeNode node = new TreeNode(Node.NUNDEF);//make a node
-            setLexeme(node,true);//put the idnt in it
+            setLexeme(node, true);//put the idnt in it
             if (checkAndNotConsume("TLPAR", false)) {
                 return callstat(node);//making a function call
             }
             return idasgnstat(arrayVar(node));//assigning call
         } else if (checkAndNotConsume("TINKW", false) || checkAndNotConsume("TOUTP", false)) { //check for ins and outs
             return iostat();
-        } else if (checkAndNotConsume("TRETN", true)){//check for a return
+        } else if (checkAndNotConsume("TRETN", true)) {//check for a return
             return returnstat();//return statements
         }
         return null;
@@ -462,16 +516,30 @@ public class Parser {
     private TreeNode forstat() {//go through a for statement
         TreeNode node = new TreeNode(Node.NFORL);//set node
         check("TFORK", true);//consume for node
-        if(!check("TLPAR", true)){return null;} //consume left par
+        if (!check("TLPAR", true)) {
+            return null;
+        } //consume left par
         node.setLeft(asgnlist());//set the iterator
-        if(node.getLeft()==null){return null;}//error recovery
-        if(!check("TSEMI", true)){return null;}//check ;
+        if (node.getLeft() == null) {
+            return null;
+        }//error recovery
+        if (!check("TSEMI", true)) {
+            return null;
+        }//check ;
         node.setMiddle(bool()); //set the exit condition
-        if(node.getMiddle()==null){return null;}//error checking
-        if(!check("TRPAR", true)){return null;}//check )
+        if (node.getMiddle() == null) {
+            return null;
+        }//error checking
+        if (!check("TRPAR", true)) {
+            return null;
+        }//check )
         node.setRight(stats());//go through all the statements
-        if(node.getRight()==null){return null;} //see if there was a problem in the stats
-        if(!check("TENDK", true)){return null;}//end
+        if (node.getRight() == null) {
+            return null;
+        } //see if there was a problem in the stats
+        if (!check("TENDK", true)) {
+            return null;
+        }//end
         return node;//return
     }
 
@@ -479,14 +547,24 @@ public class Parser {
     private TreeNode repstat() {
         TreeNode node = new TreeNode(Node.NREPT); //make a node
         check("TREPT", true); //check repeat
-        if(!check("TLPAR", true)){return null;} //check (
+        if (!check("TLPAR", true)) {
+            return null;
+        } //check (
         node.setLeft(asgnlist()); //assign some shit
-        if(!check("TRPAR", true)){return null;} //check )
+        if (!check("TRPAR", true)) {
+            return null;
+        } //check )
         node.setMiddle(stats()); //set the statements
-        if(node.getMiddle()==null){return null;} //check if something went wrong
-        if(!check("TUNTL", true)){return null;}// check until
+        if (node.getMiddle() == null) {
+            return null;
+        } //check if something went wrong
+        if (!check("TUNTL", true)) {
+            return null;
+        }// check until
         node.setRight(bool());//end condition
-        if(node.getRight()==null){return null;}//check if something else went wrong
+        if (node.getRight() == null) {
+            return null;
+        }//check if something else went wrong
         return node;//return
     }
 
@@ -500,7 +578,9 @@ public class Parser {
     private TreeNode alist() {//a list of of stuff to assign
         TreeNode node = new TreeNode(Node.NASGNS);//make a node
         node.setLeft(asgnstat());//start assigning
-        if(node.getLeft()==null){return null;}//see if something was wrong
+        if (node.getLeft() == null) {
+            return null;
+        }//see if something was wrong
         node.setRight(alisttail());//set
         return node;
     }
@@ -515,16 +595,26 @@ public class Parser {
     private TreeNode ifstat() { //if statement
         TreeNode node = new TreeNode(Node.NIFTH); //set the node
         check("TIFKW", true); //check stuff
-        if(!check("TLPAR", true)){return null;}
+        if (!check("TLPAR", true)) {
+            return null;
+        }
         node.setLeft(bool());//set the check expression
-        if(node.getLeft()==null){return null;}//check if something has gone wrong
-        if(!check("TRPAR", true)){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }//check if something has gone wrong
+        if (!check("TRPAR", true)) {
+            return null;
+        }
         node.setMiddle(stats()); //set the statements
-        if(node.getMiddle()==null){return null;}
+        if (node.getMiddle() == null) {
+            return null;
+        }
         if (check("TELSE", false)) {
             node.setRight(stats());
         }
-        if(!check("TENDK", true)){return null;}
+        if (!check("TENDK", true)) {
+            return null;
+        }
         return node;
     }
 
@@ -532,10 +622,16 @@ public class Parser {
     private TreeNode asgnstat() {
         TreeNode node = new TreeNode(Node.NASGN);//make a node
         node.setLeft(var());//set the left variable
-        if(node.getLeft()==null){return null;}
-        if(!check("TASGN", true)){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }
+        if (!check("TASGN", true)) {
+            return null;
+        }
         node.setRight(bool());
-        if(node.getRight()==null){return null;}
+        if (node.getRight() == null) {
+            return null;
+        }
         return node;
     }
 
@@ -543,10 +639,16 @@ public class Parser {
     private TreeNode idasgnstat(TreeNode varNode) {
         TreeNode node = new TreeNode(Node.NASGN);
         node.setLeft(varNode);
-        if(node.getLeft()==null){return null;}
-        if(!check("TASGN", true)){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }
+        if (!check("TASGN", true)) {
+            return null;
+        }
         node.setRight(bool());
-        if(node.getRight()==null){return null;}
+        if (node.getRight() == null) {
+            return null;
+        }
         return node;
     }
 
@@ -554,19 +656,27 @@ public class Parser {
     private TreeNode iostat() {
         if (check("TINKW", false)) { //check in
             TreeNode node = new TreeNode(Node.NINPUT);
-            if(!check("TINPT", true)){return null;}
+            if (!check("TINPT", true)) {
+                return null;
+            }
             node.setLeft(vlist()); //get list
-            if(node.getLeft()==null) {return null;}
+            if (node.getLeft() == null) {
+                return null;
+            }
             //check("TSEMI",true);
             return node;
         } else if (check("TOUTP", false)) { //check out
             TreeNode node = new TreeNode(Node.NOUTP);
-            if(!check("TASGN", true)){return null;} //assign
+            if (!check("TASGN", true)) {
+                return null;
+            } //assign
             if (check("TOUTL", false)) {//out
                 node.setValue(Node.NOUTL);
             } else {
                 node.setMiddle(prlist());
-                if(node.getMiddle()==null){return null;}
+                if (node.getMiddle() == null) {
+                    return null;
+                }
                 if (check("TASGN", false) && check("TOUTL", false)) {
                     node.setValue(Node.NOUTL);
                 }
@@ -579,10 +689,12 @@ public class Parser {
     //function call
     private TreeNode callstat(TreeNode callNode) {
         callNode.setValue(Node.NCALL);
-        if(!check("TLPAR", true)){return null;}
+        if (!check("TLPAR", true)) {return null;}
         callNode.setLeft(callstatelist()); //arguments
-        if(callNode.getLeft()==null){return null;}
-        if(!check("TRPAR", true)){return null;}
+        if (callNode.getLeft() == null) {return null;}
+        if (!check("TRPAR", true)) {return null;}
+
+        checkParamaters(callNode);
         return callNode;
     }
 
@@ -601,7 +713,9 @@ public class Parser {
     //return statement
     private TreeNode returnstat() {
         TreeNode node = new TreeNode(Node.NRETN);
-        if(!check("TRETN", true)){return null;}
+        if (!check("TRETN", true)) {
+            return null;
+        }
         node.setLeft(returnstattail());
         return node;
     }
@@ -619,7 +733,9 @@ public class Parser {
     private TreeNode vlist() {
         TreeNode node = new TreeNode(Node.NVLIST);
         node.setLeft(var());
-        if(node.getLeft()==null){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }
         node.setRight(vlisttail());
         return node;
     }
@@ -636,7 +752,7 @@ public class Parser {
     private TreeNode var() {
         TreeNode node = new TreeNode(Node.NSIMV);
         if (checkAndNotConsume("TIDNT", false)) {
-            setLexeme(node,true);
+            setLexeme(node, true);
         }
         return arrayVar(node);//checks if its an array variable
     }
@@ -646,17 +762,26 @@ public class Parser {
         if (check("TLBRK", false)) {
             varNode.setValue(Node.NAELT);
             varNode.setLeft(expr());
-            if(varNode.getLeft()==null){return null;}
-            if(!check("TRBRK", true)){return null;}
+            if (varNode.getLeft() == null) {
+                return null;
+            }
+            if (!check("TRBRK", true)) {
+                return null;
+            }
             //return arrayVarStruct(varNode);
             if (check("TDOTT", false)) {
                 varNode.setValue(Node.NARRV); //set value of the node
                 if (checkAndNotConsume("TIDNT", true)) { //get tidnt
                     TreeNode node = new TreeNode(Node.NSIMV);//make a new node
                     //todo this lexeme is in the struct which is in the hashmap of the type
-                    setLexeme(node,true);//put the idnt in it
+                    HashMap<String, StRec> previousSymbolTable = currentSymbolTable;
+                    currentSymbolTable = varNode.getName().getTypeName().getTypeName().getHashTable();
+                    setLexeme(node, true);//put the idnt in it
+                    currentSymbolTable = previousSymbolTable;
                     varNode.setRight(node);//put it to the right of the array node
-                    if(varNode.getRight()==null){return null;}//check if something went wrong
+                    if (varNode.getRight() == null) {
+                        return null;
+                    }//check if something went wrong
                 }
             }
             return varNode; //return array node
@@ -669,7 +794,9 @@ public class Parser {
     private TreeNode elist() {
         TreeNode node = new TreeNode(Node.NEXPL);
         node.setLeft(bool()); //set the argument in the node
-        if(node.getLeft()==null){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }
         node.setRight(elisttail()); //check if there are mode
         return node;
     }
@@ -690,9 +817,13 @@ public class Parser {
     private TreeNode booltail(TreeNode relNode) {
         if (check("TANDK", false) || check("TORKW", false) || check("TXORK", false)) {
             TreeNode node = logop(relNode); //node is a logop
-            if(node==null){return null;} //check if something went wrong
+            if (node == null) {
+                return null;
+            } //check if something went wrong
             node.setRight(rel()); //get other side of expression
-            if(node.getRight()==null){return null;} //check if something went wrong
+            if (node.getRight() == null) {
+                return null;
+            } //check if something went wrong
             return booltail(node); //
         }
         return relNode;
@@ -702,7 +833,9 @@ public class Parser {
         if (check("TNOTK", false)) { //if not
             TreeNode node = new TreeNode(Node.NNOT); //make node
             node.setMiddle(rel()); //set expression
-            if(node.getMiddle()==null){return null;} //see if something went wrong
+            if (node.getMiddle() == null) {
+                return null;
+            } //see if something went wrong
             return node;
         }
         return reltail(expr()); //return the expression
@@ -713,9 +846,13 @@ public class Parser {
                 checkAndNotConsume("TLEQL", false) || checkAndNotConsume("TLESS", false) ||
                 checkAndNotConsume("TGREQ", false)) { //check for part of expression
             TreeNode node = relop(expr); //call relop
-            if(node==null){return null;} //see if something went wrong
+            if (node == null) {
+                return null;
+            } //see if something went wrong
             node.setRight(expr()); //set the expression to the right
-            if(node.getRight()==null){return null;} //see if something went wrong
+            if (node.getRight() == null) {
+                return null;
+            } //see if something went wrong
             return node;
         }
         return expr;
@@ -730,9 +867,13 @@ public class Parser {
         } else if (check("TXORK", false)) {
             node = new TreeNode(Node.NXOR);
         }
-        if(node==null){return null;}
+        if (node == null) {
+            return null;
+        }
         node.setLeft(rel); //set the rel to the left of it
-        if(node.getLeft()==null){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }
         return node;
     }
 
@@ -751,9 +892,13 @@ public class Parser {
         } else if (check("TGREQ", false)) {
             node = new TreeNode(Node.NGEQ);
         }
-        if (node == null) {return null;}
+        if (node == null) {
+            return null;
+        }
         node.setLeft(expr); //set the expression after it
-        if(node.getLeft()==null){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }
         return node;
     }
 
@@ -765,16 +910,24 @@ public class Parser {
         if (check("TADDT", false)) { //if its an +
             TreeNode node = new TreeNode(Node.NADD); //make the node
             node.setLeft(term);//set the first term to the left
-            if(node.getLeft()==null){return null;} //if something went wrong
+            if (node.getLeft() == null) {
+                return null;
+            } //if something went wrong
             node.setRight(term());//set the other side of the expression to the right
-            if(node.getRight()==null){return null;} //if something went wrong
+            if (node.getRight() == null) {
+                return null;
+            } //if something went wrong
             return exprtail(node); //return the end of the expression
         } else if (check("TSUBT", false)) {
             TreeNode node = new TreeNode(Node.NSUB); //define the node
             node.setLeft(term); //same as above
-            if(node.getLeft()==null){return null;}
+            if (node.getLeft() == null) {
+                return null;
+            }
             node.setRight(term());
-            if(node.getRight()==null){return null;}
+            if (node.getRight() == null) {
+                return null;
+            }
             return exprtail(node);
         } else {
             return term; //return node term node
@@ -791,23 +944,35 @@ public class Parser {
         if (check("TMULT", false)) {
             TreeNode node = new TreeNode(Node.NMUL);
             node.setLeft(fact);
-            if(node.getLeft()==null){return null;}
+            if (node.getLeft() == null) {
+                return null;
+            }
             node.setRight(term());
-            if(node.getRight()==null){return null;}
+            if (node.getRight() == null) {
+                return null;
+            }
             return termtail(node);
         } else if (check("TDIVT", false)) {
             TreeNode node = new TreeNode(Node.NDIV);
             node.setLeft(fact);
-            if(node.getLeft()==null){return null;}
+            if (node.getLeft() == null) {
+                return null;
+            }
             node.setRight(term());
-            if(node.getRight()==null){return null;}
+            if (node.getRight() == null) {
+                return null;
+            }
             return termtail(node);
         } else if (check("TPERC", false)) {
             TreeNode node = new TreeNode(Node.NMOD);
             node.setLeft(fact);
-            if(node.getLeft()==null){return null;}
+            if (node.getLeft() == null) {
+                return null;
+            }
             node.setRight(term());
-            if(node.getRight()==null){return null;}
+            if (node.getRight() == null) {
+                return null;
+            }
             return termtail(node);
         }
         return fact;
@@ -823,9 +988,13 @@ public class Parser {
         if (check("TCART", false)) { //check for ^ or epsilon
             TreeNode node = new TreeNode(Node.NPOW); //set node
             node.setLeft(exp); //set left expression
-            if(node.getLeft()==null){return null;}
+            if (node.getLeft() == null) {
+                return null;
+            }
             node.setRight(exponent()); //set right expression
-            if(node.getRight()==null){return null;}
+            if (node.getRight() == null) {
+                return null;
+            }
             return facttail(node); //return facttail
         }
         return exp;
@@ -834,7 +1003,7 @@ public class Parser {
     private TreeNode exponent() {
         if (checkAndNotConsume("TIDNT", false)) { //got an identifier
             TreeNode node = new TreeNode(Node.NUNDEF); //make a node, dont know what it is yet
-            setLexeme(node,true); //set the lexeme in the node
+            setLexeme(node, true); //set the lexeme in the node
             if (checkAndNotConsume("TLPAR", false)) { //check (
                 return fncall(node); //we got a function
             } else {
@@ -844,12 +1013,12 @@ public class Parser {
             TreeNode node = new TreeNode(Node.NILIT);
             //setLexeme(node,true); //set the lexeme in the node
             //todo need to change this
-            node.setName(new StRec(tokens.get(0).value,tokens.get(0).line));
+            node.setName(new StRec(tokens.get(0).value, tokens.get(0).line));
             tokens.remove(0);
             return node;
-        }else if(checkAndNotConsume("TFLIT",false)){ //a float
+        } else if (checkAndNotConsume("TFLIT", false)) { //a float
             TreeNode node = new TreeNode(Node.NFLIT);
-            node.setName(new StRec(tokens.get(0).value,tokens.get(0).line));
+            node.setName(new StRec(tokens.get(0).value, tokens.get(0).line));
             tokens.remove(0);
             return node;
         } else if (check("TTRUE", false)) { //true
@@ -870,10 +1039,10 @@ public class Parser {
     private TreeNode fncall(TreeNode idexp) {
         //function call
         idexp.setValue(Node.NFCALL); //set node
-        if(!check("TLPAR", true)){return null;}//(
+        if (!check("TLPAR", true)) {return null;}
         idexp.setMiddle(fncalllist()); //get arguments
-        if(!check("TRPAR", true)){return null;} //)
-
+        if (!check("TRPAR", true)) {return null;}
+        checkParamaters(idexp);
         return idexp;//return node
     }
 
@@ -889,7 +1058,9 @@ public class Parser {
     private TreeNode prlist() {
         TreeNode node = new TreeNode(Node.NPRLST);//set node
         node.setLeft(printitem());//set print item
-        if(node.getLeft()==null){return null;}
+        if (node.getLeft() == null) {
+            return null;
+        }
         node.setRight(prlisttail());//if we need more
         return node;
     }
@@ -904,7 +1075,10 @@ public class Parser {
     private TreeNode printitem() {
         if (checkAndNotConsume("TSTRG", false)) { //check for a string
             TreeNode node = new TreeNode(Node.NSTRG); //make a new node
-            setLexeme(node,false);//add it to the node
+            //setLexeme(node, false);//add it to the node
+            //todo do this better
+            node.setName(new StRec(tokens.get(0).value, tokens.get(0).line));
+            tokens.remove(0);
             return node;
         }
         return expr(); //if no string, return expression
