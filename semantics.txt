@@ -1,0 +1,15 @@
+done:
+    parameter checking on function calls
+    checking if a variable has already been declared
+    checking if a variable isn't declared
+
+not done:
+    all expression checking
+        type of expression
+        valid types used in expression
+        type promotion?
+
+
+    checking that a function returns what its meant to
+    type of constants
+    program name matches at the start and end

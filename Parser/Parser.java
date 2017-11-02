@@ -20,14 +20,14 @@ public class Parser {
     public void run() {
         root = program();
 
-//        for(HashMap.Entry e : globalSymbolTable.entrySet()){
-//            System.out.println(e.getKey()+ " " +((StRec)e.getValue()).getTypeName().getName());
-//            if(((StRec)e.getValue()).getHashTable()!=null){
-//                for(HashMap.Entry i : ((StRec)e.getValue()).getHashTable().entrySet()){
-//                    System.out.println("  "+i.getKey()+ " " +((StRec)i.getValue()).getTypeName().getName());
-//                }
-//            }
-//        }
+        for(HashMap.Entry e : globalSymbolTable.entrySet()){
+            System.out.println(e.getKey()+ " " +((StRec)e.getValue()).getTypeName().getName());
+            if(((StRec)e.getValue()).getHashTable()!=null){
+                for(HashMap.Entry i : ((StRec)e.getValue()).getHashTable().entrySet()){
+                    System.out.println("  "+i.getKey()+ " " +((StRec)i.getValue()).getTypeName().getName());
+                }
+            }
+        }
 
     }
 
@@ -115,7 +115,7 @@ public class Parser {
         //tokens.remove(0);
     }
 
-    public void checkParamaters(TreeNode callNode){
+    private void checkParamaters(TreeNode callNode){
         //narrp = array    //nsimp = everything else
         TreeNode nplist = globalSymbolTable.get(callNode.getName().getName()).getDeclPlace().getLeft();
         ArrayList<TreeNode> arguments = new ArrayList<>();
@@ -145,11 +145,26 @@ public class Parser {
 
     }
 
+    private void evaluateExpression(TreeNode node){
+        ArrayList<StRec> types = new ArrayList<>();
+        getTypes(node, types);
+
+    }
+
+    private void getTypes(TreeNode node, ArrayList<StRec> types){
+        if(node == null){
+            return;
+        }
+
+    }
+
+
     //the start of the parser tree
     private TreeNode program() {
         check("TCD", true); //check for TCD token
-        check("TIDNT", true); //check for the identifier that follows
+        checkAndNotConsume("TIDNT", true); //check for the identifier that follows
         TreeNode node = new TreeNode(Node.NPROG); //create a node
+        setLexeme(node,false);
         node.setLeft(globals()); //set the globals
         node.setMiddle(funcs()); //set the functions
         node.setRight(mainbody()); //set the main body
@@ -196,6 +211,7 @@ public class Parser {
         setLexeme(node, false);
         check("TISKW", true);
         node.setLeft(expr());
+
         //todo: get type of expr() and put it in the StRec
         return node;
     }
@@ -903,7 +919,9 @@ public class Parser {
     }
 
     private TreeNode expr() {
-        return exprtail(term());
+        TreeNode expr = exprtail(term());
+        evaluateExpression(expr);
+        return expr;
     }
 
     private TreeNode exprtail(TreeNode term) {
