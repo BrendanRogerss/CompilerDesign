@@ -38,7 +38,7 @@ public class StRec {
     // Only needed if we wish to allow field names to be re-used in structs
 
     private int base;    // base register number		// added for code generator
-    private int offset;    // allocated offset		// added for code generator
+    public int offset;    // allocated offset		// added for code generator
 
     public StRec(String s) {
         this(s, 0, -1);

@@ -111,7 +111,7 @@ public class Parser {
 
     private void setType(TreeNode node, String type) { //adds the string passed in as the type in the node
         node.getName().setTypeName(type);
-        node.setType(new StRec(type, tokens.get(0).line));
+        node.setType(node.getName().getTypeName());
         //tokens.remove(0);
     }
 
@@ -147,7 +147,8 @@ public class Parser {
 
     private void evaluateExpression(TreeNode node){
         ArrayList<StRec> types = new ArrayList<>();
-        getTypes(node, types);
+        //getTypes(node, types);
+        getTypeRec(node);
 
     }
 
@@ -155,9 +156,32 @@ public class Parser {
         if(node == null){
             return;
         }
-
     }
 
+    private StRec getTypeRec(TreeNode node){
+        if(node.getType()!= null){
+            return node.getType();
+        }
+        switch (node.getValue()){
+            case NILIT: return StRec.INTTYPE;
+            case NFLIT: return StRec.REALTYPE;
+            case NSIMV: return node.getName().getTypeName();
+        }
+
+        StRec left = getTypeRec(node.getLeft());
+        if(node.getRight() == null){
+          return left;
+        }
+        StRec right = getTypeRec(node.getRight());
+        if(right == left){
+            node.setType(left);
+            return left;
+        }else{
+            System.out.println("Type error");
+        }
+
+        return left;
+    }
 
     //the start of the parser tree
     private TreeNode program() {

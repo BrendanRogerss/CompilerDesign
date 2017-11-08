@@ -16,10 +16,10 @@ public class A3 {
     public static void main(String[] args) {
         A3 a3 = new A3();
         //a3.run(args[0]);
-        a3.run("TestCode/cdsrc99.txt");
+        a3.run("TestCode/cdA.txt");
     }
 
-    public void run(String filename){
+    public TreeNode run(String filename){
         tokens = scanner.run(filename); //get a list of all the tokens
         parser = new Parser(tokens); //init the parser
         //System.out.println(listing(filename));
@@ -28,6 +28,7 @@ public class A3 {
         printTree(parser.root, 0);
         System.out.println(); //space
         printSpec(parser.root); //print the tree
+        return parser.root;
     }
 
     public void printSpec(TreeNode node){

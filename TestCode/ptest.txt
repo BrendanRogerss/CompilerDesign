@@ -1,13 +1,17 @@
-CD ex1
-/-- <globals>
-/-- <funcs>
+CD realLit
+
 main
-  x : real,
-  y : integer,
-  z : boolean
+  i:integer, j:integer, k:integer,
+  x:real, y:real, z:real
 begin
-  repeat()
-  y<<1;
-  until true;
-  Out << "Hello World";
-end CD ex1
+  i << 7;
+  j << 4;
+  k << i - j;
+
+  x << 3.14159;
+  y << 2.71828;
+  z << x * y;
+
+  Out << k << Line;
+
+end CD realLit

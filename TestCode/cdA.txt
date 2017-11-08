@@ -1,7 +1,16 @@
 CD A
 
 main
-   i:integer
+   i:integer, a:integer, b:integer, c:real, d:real
 begin
-   i << 123;
+   a << 2;
+   b << 2+a;
+   i << a*b;
+   Out << i << Line;
+   c << 2.2 * 9.7;
+   d << 5.7;
+   Out << c << Line;
+   c << d+12.7;
+   d<<c^2;
+   Out << d << Line;
 end CD A
